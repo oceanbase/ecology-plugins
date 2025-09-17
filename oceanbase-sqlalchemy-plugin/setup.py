@@ -40,9 +40,6 @@ setup(
         "Programming Language :: Python :: 3.12",
         "Topic :: Database",
         "Topic :: Software Development :: Libraries :: Python Modules",
-        "Framework :: SQLAlchemy",
-        "Framework :: SQLAlchemy :: 1.3",
-        "Framework :: SQLAlchemy :: 2.0",
     ],
     python_requires=">=3.7",
     project_urls={
