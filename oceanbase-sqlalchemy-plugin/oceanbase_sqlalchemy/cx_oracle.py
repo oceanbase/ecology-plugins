@@ -86,7 +86,7 @@ class OceanBaseDialect_cx_oracle(OracleDialect_cx_oracle):
         # OceanBase fully supports Unicode and should not use bytes encoding
         self.supports_unicode_binds = True
 
-    @reflection.cache()
+    @reflection.cache
     def _get_constraint_data(
         self, connection, table_name, schema=None, dblink="", **kw
     ):

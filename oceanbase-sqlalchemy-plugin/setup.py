@@ -5,7 +5,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="oceanbase-sqlalchemy",
-    version="0.5.0",
+    version="0.5.1",
     description="SQLAlchemy dialect for OceanBase Oracle mode (supports SQLAlchemy 1.3.x and 2.0+)",
     long_description=open("README.md", "r", encoding="utf-8").read(),
     long_description_content_type="text/markdown",
