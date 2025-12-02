@@ -1,8 +1,0 @@
-{
-    "name": "seekdb-plugin",
-    "description": "A Claude skill plugin that adds seekdb documentation references to your project's AI documentation files. Enables AI assistants to access seekdb best practices, SQL syntax, Python SDK patterns, vector search, and hybrid search guidelines without cluttering your project with large documentation files.",
-    "version": "0.1.0",
-    "author": {
-      "name": "David Zhang"
-    }
-  }

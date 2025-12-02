@@ -21,7 +21,6 @@ OceanBase 是一款兼容 MySQL 和 Oracle 协议的高性能数据库。本仓�
 | [LangGraph Checkpoint OceanBase 插件](./langgraph-checkpoint-oceanbase-plugin/README.md)    | 保存 LangGraph 的 checkpoint | 使用 OceanBase MySQL 模式实现了 LangGraph CheckpointSaver                 |
 | [OceanBase Dify 插件](./dify-plugin-oceanbase/README_CN.md)                                 | AI 应用                      | 通过 Dify 应用程序在 OceanBase 数据库上安全执行 SQL 查询                  |
 | [LangGraph Checkpoint OceanBase 插件](./langgraph-checkpoint-oceanbase-plugin/README_CN.md) | 保存 LangGraph 的 checkpoint | 使用 OceanBase MySQL 模式实现了 LangGraph CheckpointSaver                 |
-| [Seekdb Claude Code 插件](./seekdb-claudecode-plugin/README_CN.md)                          | 开发工具                     | 为 Claude Code 提供 seekdb 数据库相关文档支持                             |
 
 ---
 
@@ -100,14 +99,6 @@ OceanBase 是一款兼容 MySQL 和 Oracle 协议的高性能数据库。本仓�
 
 ---
 
-### ✅ Seekdb Claude Code 插件
-
-- **功能**：为 Claude Code 提供 seekdb 数据库相关文档支持，内置完整的 seekdb 官方文档知识库，支持文档查询和检索。
-- **适用场景**：在 Claude Code 中使用 seekdb 数据库时，需要查询技术文档和获取最佳实践。
-- **详细文档**：[Seekdb Claude Code 插件](./seekdb-claudecode-plugin/README_CN.md)
-
----
-
 ## 📚 完整文档链接
 
 | 插件名称                            | 文档链接                                                                                 |
@@ -121,7 +112,6 @@ OceanBase 是一款兼容 MySQL 和 Oracle 协议的高性能数据库。本仓�
 | LangGraph Checkpoint OceanBase 插件 | [LangGraph Checkpoint OceanBase 插件](./langgraph-checkpoint-oceanbase-plugin/README.md)    |
 | OceanBase Dify 插件                 | [OceanBase Dify 插件](./dify-plugin-oceanbase/README_CN.md)                                 |
 | LangGraph Checkpoint OceanBase 插件 | [LangGraph Checkpoint OceanBase 插件](./langgraph-checkpoint-oceanbase-plugin/README_CN.md) |
-| Seekdb Claude Code 插件             | [Seekdb Claude Code 插件](./seekdb-claudecode-plugin/README_CN.md)                          |
 
 ---
 

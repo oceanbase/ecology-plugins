@@ -18,7 +18,6 @@ OceanBase is a high-performance database compatible with both MySQL and Oracle p
 | [OceanBase SQLAlchemy Plugin](./oceanbase-sqlalchemy-plugin/README.md)                     | Python ORM                | SQLAlchemy dialect for OceanBase Oracle mode, compatible with SQLAlchemy 1.3+ and 2.0+ |
 | [OceanBase Dify Plugin](./dify-plugin-oceanbase/README.md)                                 | AI Applications           | Enables secure SQL query execution on OceanBase databases through Dify applications    |
 | [LangGraph Checkpoint OceanBase Plugin](./langgraph-checkpoint-oceanbase-plugin/README.md) | LangGraph CheckpointSaver | Implementation of LangGraph CheckpointSaver that uses OceanBase MySQL mode             |
-| [Seekdb Claude Code Plugin](./seekdb-claudecode-plugin/README.md)                          | Development Tools         | Provides seekdb database-related documentation support for Claude Code                 |
 
 ---
 
@@ -88,13 +87,6 @@ OceanBase is a high-performance database compatible with both MySQL and Oracle p
 - **Documentation**: [LangGraph Checkpoint OceanBase Plugin](./langgraph-checkpoint-oceanbase-plugin/README.md)
 
 ---
-### ✅ Seekdb Claude Code Plugin
-
-- **Function**: Provides seekdb database-related documentation support for Claude Code, with built-in complete seekdb official documentation knowledge base supporting document query and retrieval.
-- **Use Case**: When using seekdb database in Claude Code, need to query technical documentation and obtain best practices.
-- **Documentation**: [Seekdb Claude Code Plugin](./seekdb-claudecode-plugin/README.md)
-
----
 
 ## 📚 Full Documentation Links
 
@@ -108,7 +100,6 @@ OceanBase is a high-performance database compatible with both MySQL and Oracle p
 | OceanBase SQLAlchemy Plugin           | [OceanBase SQLAlchemy Plugin](./oceanbase-sqlalchemy-plugin/README.md)                     |
 | OceanBase Dify Plugin                 | [OceanBase Dify Plugin](./dify-plugin-oceanbase/README.md)                                 |
 | LangGraph Checkpoint OceanBase Plugin | [LangGraph Checkpoint OceanBase Plugin](./langgraph-checkpoint-oceanbase-plugin/README.md) |
-| Seekdb Claude Code Plugin             | [Seekdb Claude Code Plugin](./seekdb-claudecode-plugin/README.md)                          |
 
 ---
 
