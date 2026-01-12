@@ -45,6 +45,16 @@ license = {text = "Apache-2.0"}
 
 [tool.hatchling.build]
 packages = ["pyobsql"]
+exclude = [
+    "/LICENSE",
+    "/LICENSE.txt",
+]
+
+[tool.hatch.build.targets.wheel]
+exclude = [
+    "/LICENSE",
+    "/LICENSE.txt",
+]
 
 
 
