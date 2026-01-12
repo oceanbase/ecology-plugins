@@ -4,14 +4,19 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Package version to publish (e.g., 0.1.0)'
-        required: true
+        description: 'Package version to publish (e.g., 0.1.0). Leave empty to use version from pyproject.toml'
+        required: false
         type: string
       publish_to_test_pypi:
         description: 'Publish to Test PyPI instead of PyPI'
         required: false
         type: boolean
         default: false
+      update_version:
+        description: 'Update version in pyproject.toml before publishing'
+        required: false
+        type: boolean
+        default: true
 
 permissions:
   contents: read
@@ -20,6 +25,8 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+    outputs:
+      publish_version: ${{ steps.verify_version.outputs.version }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -29,14 +36,34 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Update version in pyproject.toml
-        if: inputs.version != ''
+      - name: Check current version
+        working-directory: pyobsql-oceanbase-plugin
+        id: current_version
         run: |
-          cd pyobsql-oceanbase-plugin
+          CURRENT_VERSION=$(grep '^version = ' pyproject.toml | sed 's/version = "\(.*\)"/\1/')
+          echo "version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
+          echo "Current version in pyproject.toml: $CURRENT_VERSION"
+
+      - name: Update version in pyproject.toml
+        if: inputs.update_version == true && inputs.version != ''
+        working-directory: pyobsql-oceanbase-plugin
+        run: |
           # Update version in pyproject.toml
           sed -i "s/^version = \".*\"/version = \"${{ inputs.version }}\"/" pyproject.toml
-          echo "Updated version to ${{ inputs.version }}"
+          echo "✅ Updated version to ${{ inputs.version }}"
           cat pyproject.toml | grep "^version"
+
+      - name: Verify version
+        working-directory: pyobsql-oceanbase-plugin
+        id: verify_version
+        run: |
+          if [ "${{ inputs.version }}" != "" ] && [ "${{ inputs.update_version }}" == "true" ]; then
+            PUBLISH_VERSION="${{ inputs.version }}"
+          else
+            PUBLISH_VERSION="${{ steps.current_version.outputs.version }}"
+          fi
+          echo "Publishing version: $PUBLISH_VERSION"
+          echo "version=$PUBLISH_VERSION" >> $GITHUB_OUTPUT
 
       - name: Install build dependencies
         run: |
@@ -94,4 +121,4 @@ jobs:
           else
             echo "📍 Published to: PyPI (https://pypi.org/project/pyobsql/)"
           fi
-          echo "📦 Version: ${{ inputs.version }}"
+          echo "📦 Version: ${{ needs.build.outputs.publish_version }}"
