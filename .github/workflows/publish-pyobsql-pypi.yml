@@ -20,7 +20,6 @@ on:
 
 permissions:
   contents: read
-  id-token: write  # Required for PyPI publishing with trusted publishing
 
 jobs:
   build:
@@ -93,7 +92,6 @@ jobs:
     runs-on: ubuntu-latest
     needs: build
     permissions:
-      id-token: write  # Required for PyPI trusted publishing
       contents: read
 
     steps:
@@ -105,16 +103,21 @@ jobs:
 
       - name: Publish to Test PyPI
         if: needs.build.outputs.publish_to_test_pypi == 'true'
-        uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          repository-url: https://test.pypi.org/legacy/
-          packages-dir: dist/
+        env:
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.TEST_PYPI_API_TOKEN }}
+        run: |
+          pip install twine
+          twine upload --repository-url https://test.pypi.org/legacy/ dist/*
 
       - name: Publish to PyPI
         if: needs.build.outputs.publish_to_test_pypi != 'true'
-        uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          packages-dir: dist/
+        env:
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
+        run: |
+          pip install twine
+          twine upload dist/*
 
       - name: Display published package info
         run: |
