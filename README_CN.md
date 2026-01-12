@@ -20,7 +20,7 @@ OceanBase 是一款兼容 MySQL 和 Oracle 协议的高性能数据库。本仓�
 | [OceanBase SQLAlchemy 插件](./oceanbase-sqlalchemy-plugin/README.md)                        | Python ORM                   | SQLAlchemy 方言，支持 OceanBase Oracle 模式，兼容 SQLAlchemy 1.3+ 和 2.0+ |
 | [LangGraph Checkpoint OceanBase 插件](./langgraph-checkpoint-oceanbase-plugin/README.md)    | 保存 LangGraph 的 checkpoint | 使用 OceanBase MySQL 模式实现了 LangGraph CheckpointSaver                 |
 | [OceanBase Dify 插件](./dify-plugin-oceanbase/README_CN.md)                                 | AI 应用                      | 通过 Dify 应用程序在 OceanBase 数据库上安全执行 SQL 查询                  |
-| [LangGraph Checkpoint OceanBase 插件](./langgraph-checkpoint-oceanbase-plugin/README_CN.md) | 保存 LangGraph 的 checkpoint | 使用 OceanBase MySQL 模式实现了 LangGraph CheckpointSaver                 |
+| [PyObsql OceanBase 插件](./pyobsql-oceanbase-plugin/README.md)                                 | Python SDK                   | 支持 JSON Table、SQLAlchemy 方言扩展和高级数据类型的 OceanBase Python SDK |
 
 ---
 
@@ -91,11 +91,11 @@ OceanBase 是一款兼容 MySQL 和 Oracle 协议的高性能数据库。本仓�
 
 ---
 
-### ✅ LangGraph Checkpoint OceanBase 插件
+### ✅ PyObsql OceanBase 插件
 
-- **功能**：使用 OceanBase MySQL 模式实现了 LangGraph CheckpointSaver。
-- **适用场景**：使用 OceanBase 作为 LangGraph 的 Checkpointer。
-- **详细文档**：[LangGraph Checkpoint OceanBase 插件](./langgraph-checkpoint-oceanbase-plugin/README_CN.md)
+- **功能**：OceanBase SQL 的 Python SDK，提供扩展的 SQLAlchemy 方言支持、JSON Table 操作和高级数据类型（VECTOR、SPARSE_VECTOR、ARRAY、POINT）。
+- **适用场景**：需要使用 SQLAlchemy 与 OceanBase 数据库交互并利用 OceanBase 特定功能的 Python 应用程序。
+- **详细文档**：[PyObsql OceanBase 插件](./pyobsql-oceanbase-plugin/README.md)
 
 ---
 
@@ -111,7 +111,7 @@ OceanBase 是一款兼容 MySQL 和 Oracle 协议的高性能数据库。本仓�
 | OceanBase SQLAlchemy 插件           | [OceanBase SQLAlchemy 插件](./oceanbase-sqlalchemy-plugin/README.md)                        |
 | LangGraph Checkpoint OceanBase 插件 | [LangGraph Checkpoint OceanBase 插件](./langgraph-checkpoint-oceanbase-plugin/README.md)    |
 | OceanBase Dify 插件                 | [OceanBase Dify 插件](./dify-plugin-oceanbase/README_CN.md)                                 |
-| LangGraph Checkpoint OceanBase 插件 | [LangGraph Checkpoint OceanBase 插件](./langgraph-checkpoint-oceanbase-plugin/README_CN.md) |
+| PyObsql OceanBase 插件              | [PyObsql OceanBase 插件](./pyobsql-oceanbase-plugin/README.md)                             |
 
 ---
 

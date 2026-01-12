@@ -18,6 +18,7 @@ OceanBase is a high-performance database compatible with both MySQL and Oracle p
 | [OceanBase SQLAlchemy Plugin](./oceanbase-sqlalchemy-plugin/README.md)                     | Python ORM                | SQLAlchemy dialect for OceanBase Oracle mode, compatible with SQLAlchemy 1.3+ and 2.0+ |
 | [OceanBase Dify Plugin](./dify-plugin-oceanbase/README.md)                                 | AI Applications           | Enables secure SQL query execution on OceanBase databases through Dify applications    |
 | [LangGraph Checkpoint OceanBase Plugin](./langgraph-checkpoint-oceanbase-plugin/README.md) | LangGraph CheckpointSaver | Implementation of LangGraph CheckpointSaver that uses OceanBase MySQL mode             |
+| [PyObsql OceanBase Plugin](./pyobsql-oceanbase-plugin/README.md)                             | Python SDK                | A Python SDK for OceanBase SQL with JSON Table support and SQLAlchemy dialect extensions |
 
 ---
 
@@ -88,6 +89,14 @@ OceanBase is a high-performance database compatible with both MySQL and Oracle p
 
 ---
 
+### ✅ PyObsql OceanBase Plugin
+
+- **Function**: A Python SDK for OceanBase SQL, providing extended SQLAlchemy dialect support, JSON Table operations, and advanced data types (VECTOR, SPARSE_VECTOR, ARRAY, POINT).
+- **Use Case**: Python applications that need to interact with OceanBase databases using SQLAlchemy with OceanBase-specific features.
+- **Documentation**: [PyObsql OceanBase Plugin](./pyobsql-oceanbase-plugin/README.md)
+
+---
+
 ## 📚 Full Documentation Links
 
 | Plugin Name                           | Documentation Link                                                                      |
@@ -100,6 +109,7 @@ OceanBase is a high-performance database compatible with both MySQL and Oracle p
 | OceanBase SQLAlchemy Plugin           | [OceanBase SQLAlchemy Plugin](./oceanbase-sqlalchemy-plugin/README.md)                     |
 | OceanBase Dify Plugin                 | [OceanBase Dify Plugin](./dify-plugin-oceanbase/README.md)                                 |
 | LangGraph Checkpoint OceanBase Plugin | [LangGraph Checkpoint OceanBase Plugin](./langgraph-checkpoint-oceanbase-plugin/README.md) |
+| PyObsql OceanBase Plugin              | [PyObsql OceanBase Plugin](./pyobsql-oceanbase-plugin/README.md)                             |
 
 ---
 
