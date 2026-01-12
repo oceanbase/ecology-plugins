@@ -40,6 +40,9 @@ log_level = "INFO"
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
+[tool.hatchling.metadata]
+license = {text = "Apache-2.0"}
+
 [tool.hatchling.build]
 packages = ["pyobsql"]
 
