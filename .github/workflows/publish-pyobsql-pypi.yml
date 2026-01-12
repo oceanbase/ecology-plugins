@@ -25,8 +25,11 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     outputs:
       publish_version: ${{ steps.verify_version.outputs.version }}
+      publish_to_test_pypi: ${{ inputs.publish_to_test_pypi }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -101,14 +104,14 @@ jobs:
           path: dist/
 
       - name: Publish to Test PyPI
-        if: inputs.publish_to_test_pypi == true
+        if: needs.build.outputs.publish_to_test_pypi == 'true'
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           repository-url: https://test.pypi.org/legacy/
           packages-dir: dist/
 
       - name: Publish to PyPI
-        if: inputs.publish_to_test_pypi == false
+        if: needs.build.outputs.publish_to_test_pypi != 'true'
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           packages-dir: dist/
@@ -116,7 +119,7 @@ jobs:
       - name: Display published package info
         run: |
           echo "✅ Package published successfully!"
-          if [ "${{ inputs.publish_to_test_pypi }}" == "true" ]; then
+          if [ "${{ needs.build.outputs.publish_to_test_pypi }}" == "true" ]; then
             echo "📍 Published to: Test PyPI (https://test.pypi.org/project/pyobsql/)"
           else
             echo "📍 Published to: PyPI (https://pypi.org/project/pyobsql/)"
