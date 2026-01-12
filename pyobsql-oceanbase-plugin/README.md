@@ -7,8 +7,8 @@ A python SDK for OceanBase SQL, including JSON Table support and SQLAlchemy dial
 ### Install from Source
 
 ```shell
-git clone https://github.com/oceanbase/pyobsql.git
-cd pyobsql
+git clone https://github.com/oceanbase/ecology-plugins.git
+cd ecology-plugins/pyobsql-oceanbase-plugin
 pip install -e .
 ```
 

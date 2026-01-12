@@ -16,8 +16,8 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/oceanbase/pyobsql"
-Repository = "https://github.com/oceanbase/pyobsql.git"
+Homepage = "https://github.com/oceanbase/ecology-plugins/tree/main/pyobsql-oceanbase-plugin"
+Repository = "https://github.com/oceanbase/ecology-plugins.git"
 
 [dependency-groups]
 dev = [

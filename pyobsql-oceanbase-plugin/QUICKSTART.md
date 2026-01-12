@@ -19,8 +19,8 @@ pip install pyobsql
 Or install from source:
 
 ```bash
-git clone https://github.com/oceanbase/pyobsql.git
-cd pyobsql
+git clone https://github.com/oceanbase/ecology-plugins.git
+cd ecology-plugins/pyobsql-oceanbase-plugin
 pip install -e .
 ```
 
@@ -484,7 +484,7 @@ client.create_table('users', columns=columns, indexes=indexes)
 ## Need Help?
 
 - **Documentation**: See [README.md](README.md)
-- **Issues**: Report on [GitHub Issues](https://github.com/oceanbase/pyobsql/issues)
+- **Issues**: Report on [GitHub Issues](https://github.com/oceanbase/ecology-plugins/issues)
 - **Examples**: Check the `tests/` directory for more examples
 
 ---
