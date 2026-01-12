@@ -75,15 +75,9 @@ jobs:
       - name: Build package
         working-directory: pyobsql-oceanbase-plugin
         run: |
-          # Temporarily move LICENSE file to prevent hatchling from adding license-file field
-          if [ -f LICENSE ]; then
-            mv LICENSE LICENSE.bak
-          fi
+          # Remove LICENSE file to prevent hatchling from auto-detecting it
+          rm -f LICENSE LICENSE.txt
           python -m build
-          # Restore LICENSE file
-          if [ -f LICENSE.bak ]; then
-            mv LICENSE.bak LICENSE
-          fi
 
       - name: Check package
         working-directory: pyobsql-oceanbase-plugin
