@@ -11,7 +11,7 @@ OceanBase is a high-performance database compatible with both MySQL and Oracle p
 | Plugin Name                                                                             | Use Case                  | Key Features                                                                           |
 | --------------------------------------------------------------------------------------- | ------------------------- | -------------------------------------------------------------------------------------- |
 | [Flyway OceanBase Plugin](./flyway-oceanbase-plugin/README.md)                             | Database Migration        | Resolves compatibility issues when using Flyway with OceanBase in MySQL mode           |
-| [Trino OceanBase Plugin](./trino-oceanbase-plugin/README.md)                               | Data Analysis             | Enables Trino to connect to OceanBase (MySQL/Oracle mode)                              |
+| [Trino OceanBase Plugin](https://github.com/oceanbase/trino-oceanbase)                      | Data Analysis             | Enables Trino to connect to OceanBase (MySQL/Oracle mode)                              |
 | [WordPress OceanBase Plugin](./wordpress-oceanbase-plugin/README.md)                       | Content Management        | Fixes compatibility issues between WordPress and OceanBase MySQL tenants               |
 | [OceanBase SQL Helper Plugin](./oceanbase-sql-helper-plugin/README.md)                     | Development Tools         | VSCode extension for quick access to OceanBase SQL keywords documentation              |
 | [Metabase OceanBase Plugin](./metabase-oceanbase-plugin/README.md)                         | Data Visualization        | Enables Metabase to connect to OceanBase (MySQL/Oracle mode)                           |
@@ -34,9 +34,10 @@ OceanBase is a high-performance database compatible with both MySQL and Oracle p
 
 ### ✅ Trino OceanBase Plugin
 
-- **Function**: Enables Trino to connect to OceanBase (MySQL/Oracle mode), optimizing SQL queries and transaction handling.
+- **Function**: Enables Trino to connect to OceanBase (MySQL/Oracle mode), optimizing SQL queries and transaction handling. This project has been migrated to a new repository.
 - **Use Case**: Querying OceanBase databases via Trino (supports both modes).
-- **Documentation**: [Trino OceanBase Plugin](./trino-oceanbase-plugin/README.md)
+- **Documentation**: [Trino OceanBase Plugin](https://github.com/oceanbase/trino-oceanbase)
+- **Repository**: https://github.com/oceanbase/trino-oceanbase
 
 ---
 
@@ -102,7 +103,7 @@ OceanBase is a high-performance database compatible with both MySQL and Oracle p
 | Plugin Name                           | Documentation Link                                                                      |
 | ------------------------------------- | --------------------------------------------------------------------------------------- |
 | Flyway OceanBase Plugin               | [Flyway OceanBase Plugin](./flyway-oceanbase-plugin/README.md)                             |
-| Trino OceanBase Plugin                | [Trino OceanBase Plugin](./trino-oceanbase-plugin/README.md)                               |
+| Trino OceanBase Plugin                | [Trino OceanBase Plugin](https://github.com/oceanbase/trino-oceanbase)                      |
 | WordPress OceanBase Plugin            | [WordPress OceanBase Plugin](./wordpress-oceanbase-plugin/README.md)                       |
 | OceanBase SQL Helper Plugin           | [OceanBase SQL Helper Plugin](./oceanbase-sql-helper-plugin/README.md)                     |
 | Metabase OceanBase Plugin             | [Metabase OceanBase Plugin](./metabase-oceanbase-plugin/README.md)                         |
