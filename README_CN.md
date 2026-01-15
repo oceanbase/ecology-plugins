@@ -13,7 +13,7 @@ OceanBase 是一款兼容 MySQL 和 Oracle 协议的高性能数据库。本仓�
 | 插件名称                                                                                 | 适用场景                     | 主要功能                                                                  |
 | ---------------------------------------------------------------------------------------- | ---------------------------- | ------------------------------------------------------------------------- |
 | [Flyway OceanBase 插件](./flyway-oceanbase-plugin/README_CN.md)                             | 数据库迁移                   | 解决 Flyway 在 OceanBase MySQL 模式下的兼容性问题                         |
-| [Trino OceanBase 插件](./trino-oceanbase-plugin/README_CN.md)                               | 数据分析                     | 支持 Trino 连接 OceanBase（MySQL/Oracle 模式）                            |
+| [Trino OceanBase 插件](https://github.com/oceanbase/trino-oceanbase)                        | 数据分析                     | 支持 Trino 连接 OceanBase（MySQL/Oracle 模式）                            |
 | [WordPress OceanBase 插件](./wordpress-oceanbase-plugin/README_CN.md)                       | 内容管理                     | 修复 WordPress 与 OceanBase MySQL 租户的兼容性问题                        |
 | [OceanBase SQL 助手插件](./oceanbase-sql-helper-plugin/README_CN.md)                        | 开发工具                     | VSCode 插件，快速访问 OceanBase SQL 关键词文档                            |
 | [Metabase OceanBase 插件](./metabase-oceanbase-plugin/README_CN.md)                         | 数据可视化                   | 支持 Metabase 连接 OceanBase（MySQL/Oracle 模式）                         |
@@ -36,9 +36,10 @@ OceanBase 是一款兼容 MySQL 和 Oracle 协议的高性能数据库。本仓�
 
 ### ✅ Trino OceanBase 插件
 
-- **功能**：支持 Trino 连接 OceanBase（MySQL/Oracle 模式），优化 SQL 查询与事务处理。
+- **功能**：支持 Trino 连接 OceanBase（MySQL/Oracle 模式），优化 SQL 查询与事务处理。此项目已迁移到新仓库。
 - **适用场景**：通过 Trino 查询 OceanBase 数据库（支持多模式）。
-- **详细文档**：[Trino OceanBase 插件](./trion-oceanbase-plugin/README_CN.md)
+- **详细文档**：[Trino OceanBase 插件](https://github.com/oceanbase/trino-oceanbase)
+- **仓库地址**：https://github.com/oceanbase/trino-oceanbase
 
 ---
 
@@ -104,7 +105,7 @@ OceanBase 是一款兼容 MySQL 和 Oracle 协议的高性能数据库。本仓�
 | 插件名称                            | 文档链接                                                                                 |
 | ----------------------------------- | ---------------------------------------------------------------------------------------- |
 | Flyway OceanBase MySQL 插件         | [Flyway OceanBase 插件](./flyway-oceanbase-plugin/README_CN.md)                             |
-| Trino OceanBase 插件                | [Trino OceanBase 插件](./trino-oceanbase-plugin/README_CN.md)                               |
+| Trino OceanBase 插件                | [Trino OceanBase 插件](https://github.com/oceanbase/trino-oceanbase)                        |
 | WordPress OceanBase 插件            | [WordPress OceanBase 插件](./wordpress-oceanbase-plugin/README_CN.md)                       |
 | OceanBase SQL 助手插件              | [OceanBase SQL 助手插件](./oceanbase-sql-helper-plugin/README_CN.md)                        |
 | Metabase OceanBase 插件             | [Metabase OceanBase 插件](./metabase-oceanbase-plugin/README_CN.md)                         |

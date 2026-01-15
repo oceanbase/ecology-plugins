@@ -27,21 +27,6 @@ jobs:
           name: flyway-database-oceanbase
           path: flyway-oceanbase-plugin/flyway-database-oceanbase/target/flyway-database-oceanbase-10.16.1.jar
 
-      - name: Set up JDK for Trino
-        uses: actions/setup-java@v3
-        with:
-          java-version: '23'
-          distribution: 'temurin'
-      - name: Build Trino Plugin
-        run: |
-          cd trino-oceanbase-plugin
-          ./mvnw clean package -DskipTests
-      - name: Archive Trino JAR
-        uses: actions/upload-artifact@v4
-        with:
-          name: trino-oceanbase-plugin
-          path: trino-oceanbase-plugin/target/*.jar
-
       - name: Set up PHP for WordPress
         uses: shivammathur/setup-php@v2
         with:
@@ -94,14 +79,6 @@ jobs:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: flyway-oceanbase-plugin/flyway-database-oceanbase/target/flyway-database-oceanbase-10.16.1.jar
           asset_name: flyway-database-oceanbase-10.16.1.jar
-          asset_content_type: application/java-archive
-
-      - name: Upload Trino Release Asset
-        uses: actions/upload-release-asset@latest
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: trino-oceanbase-plugin/target/*.jar
-          asset_name: trino-oceanbase-plugin.jar
           asset_content_type: application/java-archive
 
       - name: Upload WordPress Release Asset
