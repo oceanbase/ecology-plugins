@@ -1,6 +1,6 @@
 # Flyway-oceanbase-plugin
 
-Flyway Compatibility Plugin for OceanBase
+This plugin enables Flyway to support OceanBase in both MySQL and Oracle compatibility modes.
 
 Flyway is a powerful database migration tool, supporting both MySQL and Oracle modes. This plugin ensures compatibility between Flyway and OceanBase in **MySQL mode**, while also supporting database migrations in **Oracle mode**.
 
