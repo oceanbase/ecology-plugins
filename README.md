@@ -10,14 +10,14 @@ OceanBase is a high-performance database compatible with both MySQL and Oracle p
 
 | Plugin Name                                                                             | Use Case                  | Key Features                                                                           |
 | --------------------------------------------------------------------------------------- | ------------------------- | -------------------------------------------------------------------------------------- |
-| [Flyway OceanBase Plugin](./flyway-oceanbase-plugin/README.md)                             | Database Migration        | Resolves compatibility issues when using Flyway with OceanBase in MySQL mode           |
+| [Flyway OceanBase Plugin](./flyway-oceanbase-plugin/README.md)                             | Database Migration        | This plugin enables Flyway to support OceanBase in both MySQL and Oracle compatibility modes. |
 | [Trino OceanBase Plugin](https://github.com/oceanbase/trino-oceanbase)                      | Data Analysis             | Enables Trino to connect to OceanBase (MySQL/Oracle mode)                              |
-| [WordPress OceanBase Plugin](./wordpress-oceanbase-plugin/README.md)                       | Content Management        | Fixes compatibility issues between WordPress and OceanBase MySQL tenants               |
-| [OceanBase SQL Helper Plugin](./oceanbase-sql-helper-plugin/README.md)                     | Development Tools         | VSCode extension for quick access to OceanBase SQL keywords documentation              |
+| [WordPress OceanBase Plugin](./wordpress-oceanbase-plugin/README.md)                       | Content Management        | This plugin enables WordPress to support OceanBase in both MySQL modes.              |
+| [OceanBase SQL Helper Plugin](./oceanbase-sql-helper-plugin/README.md)                     | Development Tools         | A VSCode extension that helps developers quickly find OceanBase SQL keywords documentation. |
 | [Metabase OceanBase Plugin](./metabase-oceanbase-plugin/README.md)                         | Data Visualization        | Enables Metabase to connect to OceanBase (MySQL/Oracle mode)                           |
-| [OceanBase SQLAlchemy Plugin](./oceanbase-sqlalchemy-plugin/README.md)                     | Python ORM                | SQLAlchemy dialect for OceanBase Oracle mode, compatible with SQLAlchemy 1.3+ and 2.0+ |
-| [OceanBase Dify Plugin](./dify-plugin-oceanbase/README.md)                                 | AI Applications           | Enables secure SQL query execution on OceanBase databases through Dify applications    |
-| [LangGraph Checkpoint OceanBase Plugin](./langgraph-checkpoint-oceanbase-plugin/README.md) | LangGraph CheckpointSaver | Implementation of LangGraph CheckpointSaver that uses OceanBase MySQL mode             |
+| [OceanBase SQLAlchemy Plugin](./oceanbase-sqlalchemy-plugin/README.md)                     | Python ORM                | SQLAlchemy ORM for OceanBase Oracle mode, compatible with SQLAlchemy 1.3+ and 2.0+ |
+| [OceanBase Dify Plugin](https://github.com/oceanbase/dify-plugin-oceanbase)               | AI Applications           | Enables secure SQL query execution on OceanBase databases through Dify applications    |
+| [LangGraph Checkpoint OceanBase Plugin](./langgraph-checkpoint-oceanbase-plugin/README.md) | LangGraph CheckpointSaver | Implementation of LangGraph CheckpointSaver in OceanBase MySQL mode             |
 | [PyObsql OceanBase Plugin](./pyobsql-oceanbase-plugin/README.md)                             | Python SDK                | A Python SDK for OceanBase SQL with JSON Table support and SQLAlchemy dialect extensions |
 
 ---
