@@ -3,7 +3,11 @@
 OceanBase dialect for cx_oracle driver.
 """
 
-from sqlalchemy.dialects.oracle.cx_oracle import OracleDialect_cx_oracle
+from sqlalchemy.dialects.oracle.cx_oracle import (
+    OracleDialect_cx_oracle,
+    OracleCompiler_cx_oracle,
+)
+from sqlalchemy.dialects.oracle.base import OracleCompiler
 from sqlalchemy import select, and_, or_, bindparam, sql
 from functools import lru_cache
 from sqlalchemy.engine import reflection
@@ -19,6 +23,44 @@ if SA_20_PLUS:
     from sqlalchemy.dialects.oracle import dictionary
 
 
+class OceanBaseCompiler_cx_oracle(OracleCompiler_cx_oracle):
+    """
+    Custom compiler for OceanBase to handle bind parameter naming.
+
+    OceanBase does not support quoted bind parameter names (e.g., :"start")
+    like Oracle does. This compiler disables bind parameter quoting and
+    normalizes numeric-leading parameter names to match SQLAlchemy 2.0 behavior.
+    """
+
+    def bindparam_string(self, name, **kw):
+        """
+        Override bindparam_string to disable quoting and normalize parameter names.
+
+        Issues:
+        1. SQLAlchemy's Oracle dialect quotes bind parameter names that are
+           reserved words (e.g., :start becomes :"start"). Oracle supports this,
+           but OceanBase raises OBE-01036: illegal variable name/number.
+        2. SQLAlchemy 1.3 doesn't handle numeric-leading parameter names
+           (e.g., :123start), but SQLAlchemy 2.0+ does (converts to :D123start).
+
+        Solution:
+        1. Skip the quoting branch entirely (don't quote reserved words)
+        2. Normalize parameter names that start with digits or underscores
+           by prefixing with "D" (following SQLAlchemy 2.0 convention)
+        """
+        # Step 1: Normalize parameter names (handle numeric/underscore prefixes)
+        # Only for SQLAlchemy 2.x, as 1.3 doesn't handle this and will cause errors
+        if SA_20_PLUS:
+            escaped_from = kw.get("escaped_from", None)
+            if not escaped_from:
+                if name and (name[0].isdigit() or name[0] == "_"):
+                    new_name = "D" + name
+                    kw["escaped_from"] = name
+                    name = new_name
+
+        return OracleCompiler.bindparam_string(self, name, **kw)
+
+
 class OceanBaseDialect_cx_oracle(OracleDialect_cx_oracle):
     """
     OceanBase dialect for cx_oracle driver.
@@ -26,6 +68,9 @@ class OceanBaseDialect_cx_oracle(OracleDialect_cx_oracle):
 
     name = "oceanbase"
     driver = "cx_oracle"
+
+    # Use custom compiler that doesn't quote bind parameter names
+    statement_compiler = OceanBaseCompiler_cx_oracle
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
