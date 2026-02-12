@@ -22,6 +22,12 @@ SA_20_PLUS = SA_VERSION.startswith("2.")
 if SA_20_PLUS:
     from sqlalchemy.dialects.oracle import dictionary
 
+    _dictionary_has_ind_expressions = (
+        getattr(dictionary, "all_ind_expressions", None) is not None
+    )
+else:
+    _dictionary_has_ind_expressions = False
+
 
 class OceanBaseCompiler_cx_oracle(OracleCompiler_cx_oracle):
     """
@@ -239,6 +245,8 @@ class OceanBaseDialect_cx_oracle(OracleDialect_cx_oracle):
 
         Only for sqlalchemy 2.x compatibility.
         """
+        if not _dictionary_has_ind_expressions:
+            return super()._index_query(owner)
         return (
             select(
                 dictionary.all_ind_columns.c.table_name,

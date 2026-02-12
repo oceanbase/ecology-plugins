@@ -18,7 +18,6 @@ setup(
     keywords="sqlalchemy oceanbase oracle dialect database",
     install_requires=[
         "sqlalchemy>=1.3.0",
-        "cx_oracle>=8.0.0",
     ],
     entry_points={
         "sqlalchemy.dialects": [
