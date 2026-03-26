@@ -1,0 +1,72 @@
+# Loki + Fluentd (OceanBase) + Grafana on one Docker network.
+#
+# Environment (host .env or export):
+#   LOKI_URL                     default http://loki:3100
+#   OCEANBASE_ACCESS_KEY_ID      required, non-empty
+#   OCEANBASE_ACCESS_KEY_SECRET  required, non-empty
+#   OCEANBASE_INSTANCE_ID        required, non-empty
+#   OCEANBASE_TENANT_ID          required, non-empty
+#   OCEANBASE_ENDPOINT           default api-cloud-cn.oceanbase.com
+#   OCEANBASE_FETCH_INTERVAL     default 60
+#   OCEANBASE_LOOKBACK_SECONDS   default 600
+#   OCEANBASE_DB_NAME            default test
+#   OCEANBASE_SEARCH_KEYWORD     default SELECT
+#   OCEANBASE_PROJECT_ID         optional (unset = no header)
+#
+# Uses official fluent/fluentd image; plugins are gem-installed at container start.
+
+services:
+  loki:
+    image: grafana/loki:2.9.2
+    container_name: loki
+    ports:
+      - "3100:3100"
+    networks:
+      - obs
+
+  fluentd-oceanbase-demo:
+    image: fluent/fluentd:v1.16-1
+    container_name: fluentd-oceanbase-demo
+    user: root
+    command:
+      - /bin/sh
+      - -c
+      - |
+        gem install fluent-plugin-oceanbase-logs fluent-plugin-grafana-loki --no-document
+        mkdir -p /var/log/fluentd
+        exec fluentd -c /fluentd/etc/fluentd-to-loki.conf
+    volumes:
+      - ./fluentd-to-loki.conf:/fluentd/etc/fluentd-to-loki.conf:ro
+    environment:
+      LOKI_URL: "${LOKI_URL:-http://loki:3100}"
+      OCEANBASE_ACCESS_KEY_ID: "${OCEANBASE_ACCESS_KEY_ID}"
+      OCEANBASE_ACCESS_KEY_SECRET: "${OCEANBASE_ACCESS_KEY_SECRET}"
+      OCEANBASE_INSTANCE_ID: "${OCEANBASE_INSTANCE_ID}"
+      OCEANBASE_TENANT_ID: "${OCEANBASE_TENANT_ID}"
+      OCEANBASE_ENDPOINT: "${OCEANBASE_ENDPOINT:-api-cloud-cn.oceanbase.com}"
+      OCEANBASE_FETCH_INTERVAL: "${OCEANBASE_FETCH_INTERVAL:-60}"
+      OCEANBASE_LOOKBACK_SECONDS: "${OCEANBASE_LOOKBACK_SECONDS:-600}"
+      OCEANBASE_DB_NAME: "${OCEANBASE_DB_NAME:-test}"
+      OCEANBASE_SEARCH_KEYWORD: "${OCEANBASE_SEARCH_KEYWORD:-}"
+      OCEANBASE_PROJECT_ID: "${OCEANBASE_PROJECT_ID:-}"
+    networks:
+      - obs
+    depends_on:
+      - loki
+
+  grafana:
+    image: grafana/grafana:12.3.1
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: "${GRAFANA_ADMIN_PASSWORD:-admin}"
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    networks:
+      - obs
+    depends_on:
+      - loki
+
+networks:
+  obs:
+    driver: bridge

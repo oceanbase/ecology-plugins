@@ -1,0 +1,35 @@
+# Gem build
+*.gem
+
+# Env and secrets
+.env
+.env.local
+*.pem
+
+# Bundler
+.bundle/
+vendor/bundle/
+
+# IDE and OS
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# Test and coverage
+coverage/
+.rspec_status
+tmp/
+
+# Docker / local run
+output/
+buffer/
+state/
+*.log
+
+# Python (if scripts present)
+__pycache__/
+*.py[cod]
+.Python
+*.pyc
