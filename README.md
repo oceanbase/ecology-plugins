@@ -1,6 +1,6 @@
 # OceanBase Ecosystem Plugins Collection
 
-This repository includes multiple plugins designed to resolve compatibility issues between **OceanBase** and various frameworks/tools (such as Flyway, Trino, and WordPress). Each plugin is optimized for specific scenarios to ensure stable and efficient database operations.
+This repository includes multiple plugins designed to resolve compatibility issues between **OceanBase** and various frameworks/tools (such as Flyway, Trino, WordPress, and Fluentd). Each plugin is optimized for specific scenarios to ensure stable and efficient database operations.
 
 ---
 
@@ -18,6 +18,7 @@ OceanBase is a high-performance database compatible with both MySQL and Oracle p
 | [OceanBase SQLAlchemy Plugin](./oceanbase-sqlalchemy-plugin/README.md)                     | Python ORM                | SQLAlchemy ORM for OceanBase Oracle mode, compatible with SQLAlchemy 1.3+ and 2.0+ |
 | [OceanBase Dify Plugin](https://github.com/oceanbase/dify-plugin-oceanbase)               | AI Applications           | Enables secure SQL query execution on OceanBase databases through Dify applications    |
 | [LangGraph Checkpoint OceanBase Plugin](./langgraph-checkpoint-oceanbase-plugin/README.md) | LangGraph CheckpointSaver | Implementation of LangGraph CheckpointSaver in OceanBase MySQL mode             |
+| [Fluent Plugin OceanBase Logs](./fluent-plugin-oceanbase-logs/README.md)                   | Log collection (Fluentd)  | Fluentd input plugin that pulls slow SQL and top SQL diagnostics from OceanBase Cloud |
 | [PyObsql OceanBase Plugin](./pyobsql-oceanbase-plugin/README.md)                             | Python SDK                | A Python SDK for OceanBase SQL with JSON Table support and SQLAlchemy dialect extensions |
 
 ---
@@ -98,6 +99,14 @@ OceanBase is a high-performance database compatible with both MySQL and Oracle p
 
 ---
 
+### ✅ Fluent Plugin OceanBase Logs
+
+- **Function**: Fluentd **input** plugin that periodically pulls SQL diagnostics (slow SQL and top SQL samples) from OceanBase Cloud via API; each event is one execution sample, with optional metadata (instance, tenant, time window).
+- **Use Case**: Shipping OceanBase Cloud SQL diagnostics to Fluentd pipelines (for example JSON files, or Grafana Loki via [fluent-plugin-grafana-loki](https://github.com/grafana/fluent-plugin-grafana-loki)).
+- **Documentation**: [Fluent Plugin OceanBase Logs](./fluent-plugin-oceanbase-logs/README.md)
+
+---
+
 ## 📚 Full Documentation Links
 
 | Plugin Name                           | Documentation Link                                                                      |
@@ -110,6 +119,7 @@ OceanBase is a high-performance database compatible with both MySQL and Oracle p
 | OceanBase SQLAlchemy Plugin           | [OceanBase SQLAlchemy Plugin](./oceanbase-sqlalchemy-plugin/README.md)                     |
 | OceanBase Dify Plugin                 | [OceanBase Dify Plugin](./dify-plugin-oceanbase/README.md)                                 |
 | LangGraph Checkpoint OceanBase Plugin | [LangGraph Checkpoint OceanBase Plugin](./langgraph-checkpoint-oceanbase-plugin/README.md) |
+| Fluent Plugin OceanBase Logs          | [Fluent Plugin OceanBase Logs](./fluent-plugin-oceanbase-logs/README.md)                   |
 | PyObsql OceanBase Plugin              | [PyObsql OceanBase Plugin](./pyobsql-oceanbase-plugin/README.md)                             |
 
 ---
