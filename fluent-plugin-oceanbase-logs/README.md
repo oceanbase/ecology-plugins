@@ -13,7 +13,7 @@ Every record includes **`ob_log_type`** (`slow_sql` or `top_sql`). With `include
 
 | Gem | Fluentd | Ruby |
 | --- | --- | --- |
-| >= 0.1.2 | >= 1.8.0 | >= 2.4 |
+| >= 0.1.5 | >= 1.8.0 | >= 2.4 |
 
 For **Grafana Loki** output you additionally need [fluent-plugin-grafana-loki](https://github.com/grafana/fluent-plugin-grafana-loki).
 
@@ -43,6 +43,42 @@ tenant_id         "#{ENV['OCEANBASE_TENANT_ID']}"
 ```
 
 Optional: `OCEANBASE_ENDPOINT`, `OCEANBASE_FETCH_INTERVAL`, `OCEANBASE_LOOKBACK_SECONDS`, `OCEANBASE_DB_NAME`, `OCEANBASE_SEARCH_KEYWORD`, `OCEANBASE_PROJECT_ID` — see `.env.example` and the Docker table below.
+
+### Multiple instances, tenants, and databases
+
+Use one or more `<target>` blocks. Each block sets **`instance_id`** and **`tenant_id`** (required). Optional **`db_name`** applies the same `dbName` filter as the top-level parameter, for that scope only.
+
+When any `<target>` is present, the plugin **only** uses those scopes; top-level `instance_id` / `tenant_id` / `db_name` are ignored (you may leave them empty). Global options such as `access_key_id`, `log_type`, `search_keyword`, `endpoint`, and `fetch_interval` still apply to every target.
+
+Example: two clusters, one tenant each, and a second scope that filters one database on another tenant:
+
+```conf
+<source>
+  @type oceanbase_logs
+  tag  oceanbase.slow_sql
+  log_type slow_sql
+  access_key_id     "#{ENV['OCEANBASE_ACCESS_KEY_ID']}"
+  access_key_secret "#{ENV['OCEANBASE_ACCESS_KEY_SECRET']}"
+  endpoint     "#{ENV['OCEANBASE_ACCESS_KEY_SECRET']}"
+  fetch_interval   60
+  lookback_seconds 600
+  deduplicate      true
+  include_metadata true
+  <target>
+    instance_id "OCEANBASE_INSTANCE_1"
+    tenant_id   "OCEANBASE_TENANT_A"
+  </target>
+  <target>
+    instance_id "OCEANBASE_INSTANCE_2"
+    tenant_id   "OCEANBASE_TENANT_B"
+  </target>
+  <storage>
+    @type local
+    persistent true
+    path /var/log/fluentd/slow_sql_seen
+  </storage>
+</source>
+```
 
 ### Example: Slow SQL → JSON file
 
