@@ -24,10 +24,10 @@ services:
     networks:
       - obs
 
-  fluentd-oceanbase-demo:
+  fluentd-oceanbase-demo1:
     image: fluent/fluentd:v1.16-1
     platform: linux/amd64
-    container_name: fluentd-oceanbase-demo
+    container_name: fluentd-oceanbase-demo1
     user: root
     command:
       - /bin/sh
@@ -37,13 +37,48 @@ services:
         mkdir -p /var/log/fluentd
         exec fluentd -c /fluentd/etc/fluentd-to-loki.conf
     volumes:
-      - ./fluentd-to-loki.conf:/fluentd/etc/fluentd-to-loki.conf:ro
+      - ./fluentd-to-loki1.conf:/fluentd/etc/fluentd-to-loki.conf:ro
     environment:
       LOKI_URL: "${LOKI_URL:-http://loki:3100}"
       OCEANBASE_ACCESS_KEY_ID: "${OCEANBASE_ACCESS_KEY_ID}"
+      OCEANBASE_INSTANCE1: "${OCEANBASE_INSTANCE1}"
+      OCEANBASE_TENANT1: "${OCEANBASE_TENANT1}"
+      OCEANBASE_INSTANCE2: "${OCEANBASE_INSTANCE2}"
+      OCEANBASE_TENANT2: "${OCEANBASE_TENANT2}"
       OCEANBASE_ACCESS_KEY_SECRET: "${OCEANBASE_ACCESS_KEY_SECRET}"
-      OCEANBASE_INSTANCE_ID: "${OCEANBASE_INSTANCE_ID}"
-      OCEANBASE_TENANT_ID: "${OCEANBASE_TENANT_ID}"
+      OCEANBASE_ENDPOINT: "${OCEANBASE_ENDPOINT:-api-cloud-cn.oceanbase.com}"
+      OCEANBASE_FETCH_INTERVAL: "${OCEANBASE_FETCH_INTERVAL:-60}"
+      OCEANBASE_LOOKBACK_SECONDS: "${OCEANBASE_LOOKBACK_SECONDS:-600}"
+      OCEANBASE_DB_NAME: "${OCEANBASE_DB_NAME:-}"
+      OCEANBASE_SEARCH_KEYWORD: "${OCEANBASE_SEARCH_KEYWORD:-}"
+      OCEANBASE_PROJECT_ID: "${OCEANBASE_PROJECT_ID:-}"
+    networks:
+      - obs
+    depends_on:
+      - loki
+
+  fluentd-oceanbase-demo2:
+    image: fluent/fluentd:v1.16-1
+    platform: linux/amd64
+    container_name: fluentd-oceanbase-demo2
+    user: root
+    command:
+      - /bin/sh
+      - -c
+      - |
+        gem install fluent-plugin-oceanbase-logs fluent-plugin-grafana-loki --no-document
+        mkdir -p /var/log/fluentd
+        exec fluentd -c /fluentd/etc/fluentd-to-loki.conf
+    volumes:
+      - ./fluentd-to-loki2.conf:/fluentd/etc/fluentd-to-loki.conf:ro
+    environment:
+      LOKI_URL: "${LOKI_URL:-http://loki:3100}"
+      OCEANBASE_ACCESS_KEY_ID: "${OCEANBASE_ACCESS_KEY_ID}"
+      OCEANBASE_INSTANCE1: "${OCEANBASE_INSTANCE1}"
+      OCEANBASE_TENANT1: "${OCEANBASE_TENANT1}"
+      OCEANBASE_INSTANCE2: "${OCEANBASE_INSTANCE2}"
+      OCEANBASE_TENANT2: "${OCEANBASE_TENANT2}"
+      OCEANBASE_ACCESS_KEY_SECRET: "${OCEANBASE_ACCESS_KEY_SECRET}"
       OCEANBASE_ENDPOINT: "${OCEANBASE_ENDPOINT:-api-cloud-cn.oceanbase.com}"
       OCEANBASE_FETCH_INTERVAL: "${OCEANBASE_FETCH_INTERVAL:-60}"
       OCEANBASE_LOOKBACK_SECONDS: "${OCEANBASE_LOOKBACK_SECONDS:-600}"
@@ -67,6 +102,8 @@ services:
       - obs
     depends_on:
       - loki
+      - fluentd-oceanbase-demo1
+      - fluentd-oceanbase-demo2
 
 networks:
   obs:
