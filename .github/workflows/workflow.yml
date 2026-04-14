@@ -113,3 +113,34 @@ jobs:
         with:
           name: langgraph-checkpoint-oceanbase-plugin
           path: langgraph-checkpoint-oceanbase-plugin/dist/*
+
+  oceanbase-cli:
+    name: Test and Build OceanBase CLI
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies and run tests
+        run: |
+          cd oceanbase-cli
+          pip install --upgrade pip
+          pip install build twine wheel
+          pip install -e ".[dev]"
+          pytest tests/ -v
+
+      - name: Build Python package
+        run: |
+          cd oceanbase-cli
+          python -m build
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: oceanbase-cli
+          path: oceanbase-cli/dist/*

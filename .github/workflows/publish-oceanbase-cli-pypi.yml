@@ -1,0 +1,146 @@
+name: Publish OceanBase CLI to PyPI
+
+on:
+  push:
+    tags:
+      - 'release_oceanbase_cli_*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Package version to publish (e.g., 0.1.0). Leave empty to use version from pyproject.toml'
+        required: false
+        type: string
+      publish_to_test_pypi:
+        description: 'Publish to Test PyPI instead of PyPI'
+        required: false
+        type: boolean
+        default: false
+      update_version:
+        description: 'Update version in pyproject.toml before publishing'
+        required: false
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      publish_version: ${{ steps.verify_version.outputs.version }}
+      publish_to_test_pypi: ${{ steps.meta.outputs.publish_to_test_pypi }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set publish metadata
+        id: meta
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "publish_to_test_pypi=${{ inputs.publish_to_test_pypi }}" >> $GITHUB_OUTPUT
+          else
+            echo "publish_to_test_pypi=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Check current version
+        working-directory: oceanbase-cli
+        id: current_version
+        run: |
+          CURRENT_VERSION=$(grep '^version = ' pyproject.toml | sed 's/version = "\(.*\)"/\1/')
+          echo "version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
+          echo "Current version in pyproject.toml: $CURRENT_VERSION"
+
+      - name: Update version in pyproject.toml
+        if: github.event_name == 'workflow_dispatch' && inputs.update_version == true && inputs.version != ''
+        working-directory: oceanbase-cli
+        run: |
+          sed -i "s/^version = \".*\"/version = \"${{ inputs.version }}\"/" pyproject.toml
+          echo "Updated version to ${{ inputs.version }}"
+          grep '^version' pyproject.toml
+
+      - name: Verify version
+        working-directory: oceanbase-cli
+        id: verify_version
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ inputs.version }}" != "" ] && [ "${{ inputs.update_version }}" = "true" ]; then
+            PUBLISH_VERSION="${{ inputs.version }}"
+          else
+            PUBLISH_VERSION="${{ steps.current_version.outputs.version }}"
+          fi
+          echo "Publishing version: $PUBLISH_VERSION"
+          echo "version=$PUBLISH_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Install build dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install build twine
+
+      - name: Run tests
+        run: |
+          cd oceanbase-cli
+          pip install -e ".[dev]"
+          pytest tests/ -v
+
+      - name: Build package
+        run: |
+          rm -rf dist
+          mkdir -p dist
+          python -m build ./oceanbase-cli -o dist
+
+      - name: Check package
+        run: twine check dist/*
+
+      - name: Upload distributions
+        uses: actions/upload-artifact@v4
+        with:
+          name: pypi-distributions
+          path: dist/*
+
+  publish:
+    runs-on: ubuntu-latest
+    needs: build
+    permissions:
+      contents: read
+
+    steps:
+      - name: Download distributions
+        uses: actions/download-artifact@v4
+        with:
+          name: pypi-distributions
+          path: dist/
+
+      - name: Publish to Test PyPI
+        if: needs.build.outputs.publish_to_test_pypi == 'true'
+        env:
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.TEST_PYPI_API_TOKEN }}
+        run: |
+          pip install twine
+          twine upload --repository-url https://test.pypi.org/legacy/ dist/*
+
+      - name: Publish to PyPI
+        if: needs.build.outputs.publish_to_test_pypi != 'true'
+        env:
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
+        run: |
+          pip install twine
+          twine upload dist/*
+
+      - name: Display published package info
+        run: |
+          echo "Package published successfully!"
+          if [ "${{ needs.build.outputs.publish_to_test_pypi }}" = "true" ]; then
+            echo "Published to: Test PyPI (https://test.pypi.org/project/oceanbase-cli/)"
+          else
+            echo "Published to: PyPI (https://pypi.org/project/oceanbase-cli/)"
+          fi
+          echo "Version: ${{ needs.build.outputs.publish_version }}"
