@@ -174,6 +174,50 @@ class OceanBaseLogsInputTest < Test::Unit::TestCase
       assert_raise(Fluent::ConfigError) { create_driver(conf) }
     end
 
+    test 'multiple targets: top-level instance_id and tenant_id may be empty' do
+      conf = %(
+    tag oceanbase.logs
+    access_key_id     test_access_key_id
+    access_key_secret test_access_key_secret
+    fetch_interval    60
+    lookback_seconds  300
+    deduplicate       false
+    <target>
+      instance_id ob_a
+      tenant_id t_a
+    </target>
+    <target>
+      instance_id ob_b
+      tenant_id t_b
+      db_name analytics_db
+    </target>
+  )
+      d = create_driver(conf)
+      assert_equal 2, d.instance.instance_variable_get(:@fetch_scopes).size
+      scopes = d.instance.instance_variable_get(:@fetch_scopes)
+      assert_equal 'ob_a', scopes[0].instance_id
+      assert_equal 't_a',  scopes[0].tenant_id
+      assert_nil scopes[0].db_name
+      assert_equal 'ob_b', scopes[1].instance_id
+      assert_equal 'analytics_db', scopes[1].db_name
+    end
+
+    test 'target section missing tenant_id raises error' do
+      conf = %(
+    tag oceanbase.logs
+    access_key_id     test_access_key_id
+    access_key_secret test_access_key_secret
+    fetch_interval    60
+    lookback_seconds  300
+    deduplicate       false
+    <target>
+      instance_id ob_a
+      tenant_id ""
+    </target>
+  )
+      assert_raise(Fluent::ConfigError) { create_driver(conf) }
+    end
+
   end
 
   # ----------------------------------------------------------- fetching
@@ -266,6 +310,50 @@ class OceanBaseLogsInputTest < Test::Unit::TestCase
       d = create_driver
       d.run(timeout: 3)
       assert_equal 0, d.events.length
+    end
+
+    test 'slow_sql with two targets calls both APIs and emits scoped metadata' do
+      list_one = {
+        'success' => true,
+        'data' => { 'dataList' => [{ 'sqlId' => 'SQL_MULTI_A' }], 'total' => 1 },
+      }
+      list_two = {
+        'success' => true,
+        'data' => { 'dataList' => [{ 'sqlId' => 'SQL_MULTI_B' }], 'total' => 1 },
+      }
+      stub_digest_auth(
+        %r{instances/ob_a/tenants/t_a/slowSql},
+        list_one
+      )
+      stub_digest_auth(
+        %r{instances/ob_b/tenants/t_b/slowSql},
+        list_two
+      )
+      stub_samples_auth(SAMPLES_RESPONSE, times: 2)
+
+      conf = %(
+    tag oceanbase.logs
+    access_key_id     test_access_key_id
+    access_key_secret test_access_key_secret
+    fetch_interval    60
+    lookback_seconds  300
+    deduplicate       false
+    <target>
+      instance_id ob_a
+      tenant_id t_a
+    </target>
+    <target>
+      instance_id ob_b
+      tenant_id t_b
+    </target>
+  )
+      d = create_driver(conf)
+      d.run(timeout: 3)
+
+      events = d.events
+      assert events.length >= 2, "Expected at least 2 events, got #{events.length}"
+      insts = events.map { |e| e[2]['ob_instance_id'] }.uniq.sort
+      assert_equal %w[ob_a ob_b], insts
     end
   end
 
