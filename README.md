@@ -20,6 +20,7 @@ OceanBase is a high-performance database compatible with both MySQL and Oracle p
 | [LangGraph Checkpoint OceanBase Plugin](./langgraph-checkpoint-oceanbase-plugin/README.md) | LangGraph CheckpointSaver | Implementation of LangGraph CheckpointSaver in OceanBase MySQL mode             |
 | [Fluent Plugin OceanBase Logs](./fluent-plugin-oceanbase-logs/README.md)                   | Log collection (Fluentd)  | Fluentd input plugin that pulls slow SQL and top SQL diagnostics from OceanBase Cloud |
 | [PyObsql OceanBase Plugin](./pyobsql-oceanbase-plugin/README.md)                             | Python SDK                | A Python SDK for OceanBase SQL with JSON Table support and SQLAlchemy dialect extensions |
+| [OceanBase CLI](./oceanbase-cli/README.md)                                                   | CLI & Agent Skill         | `obcli` for MySQL protocol (encrypted local DSN, optional `policy.json`); includes [Agent Skill](./skills/oceanbase-cli/SKILL.md) for Cursor / Claude Code |
 
 ---
 
@@ -107,6 +108,14 @@ OceanBase is a high-performance database compatible with both MySQL and Oracle p
 
 ---
 
+### ✅ OceanBase CLI (`obcli`)
+
+- **Function**: Command-line tool for OceanBase over the **MySQL protocol** (via **pymysql**): encrypted DSN under `~/.config/obcli/`, read-oriented `obcli sql` by default, optional local **`policy.json`** with **`block_rules`** for write-class SQL when enabled.
+- **Use Case**: Local or scripted access to OceanBase tenants; pair with the **[Agent Skill](./skills/oceanbase-cli/SKILL.md)** so assistants invoke `obcli` only through the shell and do not modify on-disk config.
+- **Documentation**: [OceanBase CLI](./oceanbase-cli/README.md) · **Skill contract**: [skills/oceanbase-cli/SKILL.md](./skills/oceanbase-cli/SKILL.md)
+
+---
+
 ## 📚 Full Documentation Links
 
 | Plugin Name                           | Documentation Link                                                                      |
@@ -121,6 +130,7 @@ OceanBase is a high-performance database compatible with both MySQL and Oracle p
 | LangGraph Checkpoint OceanBase Plugin | [LangGraph Checkpoint OceanBase Plugin](./langgraph-checkpoint-oceanbase-plugin/README.md) |
 | Fluent Plugin OceanBase Logs          | [Fluent Plugin OceanBase Logs](./fluent-plugin-oceanbase-logs/README.md)                   |
 | PyObsql OceanBase Plugin              | [PyObsql OceanBase Plugin](./pyobsql-oceanbase-plugin/README.md)                             |
+| OceanBase CLI                         | [OceanBase CLI](./oceanbase-cli/README.md) · [Agent Skill](./skills/oceanbase-cli/SKILL.md)   |
 
 ---
 

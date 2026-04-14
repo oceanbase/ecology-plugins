@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "oceanbase-cli"
+version = "0.1.0"
+description = "OceanBase CLI (obcli) — encrypted local DSN, read-only sql without policy.json; DML/DDL when policy.json is present (block_rules); MySQL protocol via pymysql"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+dependencies = [
+    "click>=8.0",
+    "cryptography>=42.0.0",
+    "pymysql>=1.1.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0"]
+
+[project.scripts]
+obcli = "oceanbase_cli.main:cli"
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+markers = [
+    "integration: hits real network or local paths (skipped in default CI)",
+]
