@@ -26,6 +26,7 @@ services:
 
   fluentd-oceanbase-demo:
     image: fluent/fluentd:v1.16-1
+    platform: linux/amd64
     container_name: fluentd-oceanbase-demo
     user: root
     command:
@@ -46,7 +47,7 @@ services:
       OCEANBASE_ENDPOINT: "${OCEANBASE_ENDPOINT:-api-cloud-cn.oceanbase.com}"
       OCEANBASE_FETCH_INTERVAL: "${OCEANBASE_FETCH_INTERVAL:-60}"
       OCEANBASE_LOOKBACK_SECONDS: "${OCEANBASE_LOOKBACK_SECONDS:-600}"
-      OCEANBASE_DB_NAME: "${OCEANBASE_DB_NAME:-test}"
+      OCEANBASE_DB_NAME: "${OCEANBASE_DB_NAME:-}"
       OCEANBASE_SEARCH_KEYWORD: "${OCEANBASE_SEARCH_KEYWORD:-}"
       OCEANBASE_PROJECT_ID: "${OCEANBASE_PROJECT_ID:-}"
     networks:
