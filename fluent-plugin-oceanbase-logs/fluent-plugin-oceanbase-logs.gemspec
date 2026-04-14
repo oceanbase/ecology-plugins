@@ -10,7 +10,7 @@ Gem::Specification.new do |spec|
   spec.summary       = "Fluentd input plugin for OceanBase Cloud Logs"
   spec.description   = "Fetches Slow SQL and Top SQL per-execution samples from OceanBase Cloud " \
                         "and emits them as Fluentd events (one record per trace, dedup by traceId)."
-  spec.homepage      = "https://github.com/sc-source/fluent-plugin-oceanbase-logs"
+  spec.homepage      = "https://github.com/oceanbase/ecology-plugins/tree/main/fluent-plugin-oceanbase-logs"
   spec.license       = "Apache-2.0"
 
   spec.files         = Dir['lib/**/*', 'README.md', 'LICENSE']
