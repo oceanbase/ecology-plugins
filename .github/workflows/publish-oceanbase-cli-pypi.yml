@@ -137,10 +137,10 @@ jobs:
 
       - name: Display published package info
         run: |
-          echo "Package published successfully!"
-          if [ "${{ needs.build.outputs.publish_to_test_pypi }}" = "true" ]; then
-            echo "Published to: Test PyPI (https://test.pypi.org/project/oceanbase-cli/)"
+          echo "✅ Package published successfully!"
+          if [ "${{ needs.build.outputs.publish_to_test_pypi }}" == "true" ]; then
+            echo "📍 Published to: Test PyPI (https://test.pypi.org/project/oceanbase-cli/)"
           else
-            echo "Published to: PyPI (https://pypi.org/project/oceanbase-cli/)"
+            echo "📍 Published to: PyPI (https://pypi.org/project/oceanbase-cli/)"
           fi
-          echo "Version: ${{ needs.build.outputs.publish_version }}"
+          echo "📦 Version: ${{ needs.build.outputs.publish_version }}"
