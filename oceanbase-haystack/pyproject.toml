@@ -1,0 +1,54 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "oceanbase-haystack"
+dynamic = ["version"]
+description = "Haystack 2.x integration for OceanBase vector search (via pyobvector)."
+readme = "README.md"
+requires-python = ">=3.9"
+# Use `text` form so wheel/sdist metadata stays compatible with PyPI + twine (avoids strict `license-expression` validation issues from SPDX shorthand).
+license = { text = "Apache-2.0" }
+keywords = ["haystack", "oceanbase", "vector", "rag"]
+authors = [{ name = "OceanBase Haystack contributors" }]
+dependencies = [
+  "haystack-ai>=2.0.0",
+  "pyobvector>=0.1.0",
+  # pyobvector imports ``Expression`` from sqlglot; keep >=26 (pyobvector) and <30 (sqlglot 30+ uses ``Expr`` only).
+  "sqlglot>=26.0.1,<30",
+  "sqlalchemy>=2.0.0",
+  "typing_extensions>=4.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.0.0",
+  "ruff>=0.4.0",
+  "build>=1.0.0",
+]
+
+[project.urls]
+Source = "https://github.com/oceanbase/ecology-plugins/tree/main/oceanbase-haystack"
+
+[tool.hatch.version]
+path = "src/oceanbase_haystack/__about__.py"
+
+[tool.hatch.build.targets.sdist]
+include = ["/src"]
+
+[tool.hatch.envs.default]
+dependencies = ["pytest>=8.0.0"]
+
+[tool.hatch.envs.default.scripts]
+test = "pytest {args:tests}"
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+markers = [
+  "oceanbase: requires a live OceanBase instance (set OCEANBASE_CI=1; used in CI with setup-oceanbase-ce)",
+]
+
+[tool.ruff]
+line-length = 120
+target-version = "py39"

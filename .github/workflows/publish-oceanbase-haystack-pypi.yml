@@ -1,13 +1,13 @@
-name: Publish OceanBase CLI to PyPI
+name: Publish OceanBase Haystack to PyPI
 
 on:
   push:
     tags:
-      - 'release_oceanbase_cli_*'
+      - 'release_oceanbase_haystack_*'
   workflow_dispatch:
     inputs:
       version:
-        description: 'Package version to publish (e.g., 0.1.0). Leave empty to use version from pyproject.toml'
+        description: 'Package version to publish (e.g., 0.1.0). Leave empty to use version from src/oceanbase_haystack/__about__.py'
         required: false
         type: string
       publish_to_test_pypi:
@@ -16,7 +16,7 @@ on:
         type: boolean
         default: false
       update_version:
-        description: 'Update version in pyproject.toml before publishing'
+        description: 'Update version in __about__.py before publishing'
         required: false
         type: boolean
         default: true
@@ -51,23 +51,23 @@ jobs:
           python-version: '3.11'
 
       - name: Check current version
-        working-directory: oceanbase-cli
+        working-directory: oceanbase-haystack
         id: current_version
         run: |
-          CURRENT_VERSION=$(grep '^version = ' pyproject.toml | sed 's/version = "\(.*\)"/\1/')
+          CURRENT_VERSION=$(grep '^__version__' src/oceanbase_haystack/__about__.py | sed 's/__version__ = "\(.*\)"/\1/')
           echo "version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
-          echo "Current version in pyproject.toml: $CURRENT_VERSION"
+          echo "Current version in __about__.py: $CURRENT_VERSION"
 
-      - name: Update version in pyproject.toml
+      - name: Update version in __about__.py
         if: github.event_name == 'workflow_dispatch' && inputs.update_version == true && inputs.version != ''
-        working-directory: oceanbase-cli
+        working-directory: oceanbase-haystack
         run: |
-          sed -i "s/^version = \".*\"/version = \"${{ inputs.version }}\"/" pyproject.toml
-          echo "Updated version to ${{ inputs.version }}"
-          grep '^version' pyproject.toml
+          sed -i "s/^__version__ = \".*\"/__version__ = \"${{ inputs.version }}\"/" src/oceanbase_haystack/__about__.py
+          echo "✅ Updated version to ${{ inputs.version }}"
+          grep '^__version__' src/oceanbase_haystack/__about__.py
 
       - name: Verify version
-        working-directory: oceanbase-cli
+        working-directory: oceanbase-haystack
         id: verify_version
         run: |
           if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ inputs.version }}" != "" ] && [ "${{ inputs.update_version }}" = "true" ]; then
@@ -83,26 +83,25 @@ jobs:
           python -m pip install --upgrade pip
           pip install build twine
 
-      - name: Run tests
+      - name: Run tests (mocked; no live OceanBase)
+        working-directory: oceanbase-haystack
         run: |
-          cd oceanbase-cli
           pip install -e ".[dev]"
-          pytest tests/ -v
+          python -m pytest tests -v -m "not oceanbase"
 
       - name: Build package
-        run: |
-          rm -rf dist
-          mkdir -p dist
-          python -m build ./oceanbase-cli -o dist
+        working-directory: oceanbase-haystack
+        run: python -m build
 
       - name: Check package
+        working-directory: oceanbase-haystack
         run: twine check dist/*
 
       - name: Upload distributions
         uses: actions/upload-artifact@v4
         with:
           name: pypi-distributions
-          path: dist/*
+          path: oceanbase-haystack/dist/*
 
   publish:
     runs-on: ubuntu-latest
@@ -139,8 +138,8 @@ jobs:
         run: |
           echo "✅ Package published successfully!"
           if [ "${{ needs.build.outputs.publish_to_test_pypi }}" == "true" ]; then
-            echo "📍 Published to: Test PyPI (https://test.pypi.org/project/oceanbase-cli/)"
+            echo "📍 Published to: Test PyPI (https://test.pypi.org/project/oceanbase-haystack/)"
           else
-            echo "📍 Published to: PyPI (https://pypi.org/project/oceanbase-cli/)"
+            echo "📍 Published to: PyPI (https://pypi.org/project/oceanbase-haystack/)"
           fi
           echo "📦 Version: ${{ needs.build.outputs.publish_version }}"

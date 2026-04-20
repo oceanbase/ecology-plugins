@@ -35,6 +35,15 @@ Avoid `obcli --dsn '...'` where argv is visible in `ps`.
 | `obcli rules show` / `metadata` / `explain` | `policy.json` + **`policy_governs_writes`** 等 |
 | `obcli sql`, `status`, `schema tables` | Data plane |
 
+## Publishing to PyPI (maintainers)
+
+Releases are automated from [ecology-plugins](https://github.com/oceanbase/ecology-plugins): workflow **[`publish-oceanbase-cli-pypi.yml`](../.github/workflows/publish-oceanbase-cli-pypi.yml)** (same Twine + token pattern as [publish-pyobsql-pypi.yml](../.github/workflows/publish-pyobsql-pypi.yml)).
+
+- **Manual run**: Actions → *Publish OceanBase CLI to PyPI* → *Run workflow* (optional version override, Test PyPI toggle).
+- **Tag push**: push a tag matching `release_oceanbase_cli_*` after bumping `version` in [`pyproject.toml`](./pyproject.toml).
+
+Configure repository secrets **`PYPI_API_TOKEN`** / **`TEST_PYPI_API_TOKEN`** as in the monorepo [root README](../README.md#-pypi-release-workflows).
+
 ## Tests
 
 ```bash
