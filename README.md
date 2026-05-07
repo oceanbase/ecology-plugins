@@ -16,7 +16,6 @@ OceanBase is a high-performance database compatible with both MySQL and Oracle p
 | [OceanBase SQL Helper Plugin](./oceanbase-sql-helper-plugin/README.md)                     | Development Tools         | A VSCode extension that helps developers quickly find OceanBase SQL keywords documentation. |
 | [Metabase OceanBase Plugin](./metabase-oceanbase-plugin/README.md)                         | Data Visualization        | Enables Metabase to connect to OceanBase (MySQL/Oracle mode)                           |
 | [OceanBase SQLAlchemy Plugin](./oceanbase-sqlalchemy-plugin/README.md)                     | Python ORM                | SQLAlchemy ORM for OceanBase Oracle mode, compatible with SQLAlchemy 1.3+ and 2.0+ |
-| [OceanBase Dify Plugin](https://github.com/oceanbase/dify-plugin-oceanbase)               | AI Applications           | Enables secure SQL query execution on OceanBase databases through Dify applications    |
 | [LangGraph Checkpoint OceanBase Plugin](./langgraph-checkpoint-oceanbase-plugin/README.md) | LangGraph CheckpointSaver | Implementation of LangGraph CheckpointSaver in OceanBase MySQL mode             |
 | [Fluent Plugin OceanBase Logs](./fluent-plugin-oceanbase-logs/README.md)                   | Log collection (Fluentd)  | Fluentd input plugin that pulls slow SQL and top SQL diagnostics from OceanBase Cloud |
 | [PyObsql OceanBase Plugin](./pyobsql-oceanbase-plugin/README.md)                             | Python SDK                | A Python SDK for OceanBase SQL with JSON Table support and SQLAlchemy dialect extensions |
@@ -76,15 +75,6 @@ OceanBase is a high-performance database compatible with both MySQL and Oracle p
 
 ---
 
-### ✅ OceanBase Dify Plugin
-
-- **Function**: A Dify plugin for connecting to and querying OceanBase databases. This project has been migrated to a new repository.
-- **Use Case**: AI applications that need to interact with OceanBase databases through Dify platform for data querying and manipulation.
-- **Documentation**: [OceanBase Dify Plugin](./dify-plugin-oceanbase/README.md)
-- **Repository**: https://github.com/oceanbase/dify-plugin-oceanbase
-
----
-
 ### ✅ LangGraph Checkpoint OceanBase Plugin
 
 - **Function**: OceanBase MySQL mode can be used as LangGraph's CheckpointSaver to preserve both short-term and long-term memory.
@@ -138,7 +128,6 @@ OceanBase is a high-performance database compatible with both MySQL and Oracle p
 | OceanBase SQL Helper Plugin           | [OceanBase SQL Helper Plugin](./oceanbase-sql-helper-plugin/README.md)                     |
 | Metabase OceanBase Plugin             | [Metabase OceanBase Plugin](./metabase-oceanbase-plugin/README.md)                         |
 | OceanBase SQLAlchemy Plugin           | [OceanBase SQLAlchemy Plugin](./oceanbase-sqlalchemy-plugin/README.md)                     |
-| OceanBase Dify Plugin                 | [OceanBase Dify Plugin](./dify-plugin-oceanbase/README.md)                                 |
 | LangGraph Checkpoint OceanBase Plugin | [LangGraph Checkpoint OceanBase Plugin](./langgraph-checkpoint-oceanbase-plugin/README.md) |
 | Fluent Plugin OceanBase Logs          | [Fluent Plugin OceanBase Logs](./fluent-plugin-oceanbase-logs/README.md)                   |
 | PyObsql OceanBase Plugin              | [PyObsql OceanBase Plugin](./pyobsql-oceanbase-plugin/README.md)                             |
