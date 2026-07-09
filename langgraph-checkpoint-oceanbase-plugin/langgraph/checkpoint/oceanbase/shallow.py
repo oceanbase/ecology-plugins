@@ -18,7 +18,11 @@ from langgraph.checkpoint.base import (
     get_checkpoint_metadata,
 )
 from langgraph.checkpoint.oceanbase import _ainternal, _internal
-from langgraph.checkpoint.oceanbase.base import BaseMySQLSaver
+from langgraph.checkpoint.oceanbase.base import (
+    BaseMySQLSaver,
+    _AsyncCheckpointRetryMixin,
+    _SyncCheckpointRetryMixin,
+)
 from langgraph.checkpoint.oceanbase.utils import (
     deserialize_channel_values,
     deserialize_pending_sends,
@@ -212,7 +216,11 @@ def _dump_blobs(
     ]
 
 
-class BaseShallowSyncMySQLSaver(BaseMySQLSaver, Generic[_internal.C, _internal.R]):
+class BaseShallowSyncMySQLSaver(
+    _SyncCheckpointRetryMixin,
+    BaseMySQLSaver,
+    Generic[_internal.C, _internal.R],
+):
     """A checkpoint saver that uses MySQL to store checkpoints.
     This checkpointer ONLY stores the most recent checkpoint and does NOT retain any history.
     It is meant to be a light-weight drop-in replacement for the PostgresSaver that
@@ -295,6 +303,23 @@ class BaseShallowSyncMySQLSaver(BaseMySQLSaver, Generic[_internal.C, _internal.R
         before: RunnableConfig | None = None,
         limit: int | None = None,
     ) -> Iterator[CheckpointTuple]:
+        results = self._with_retry(
+            self._list,
+            config,
+            filter=filter,
+            before=before,
+            limit=limit,
+        )
+        yield from results
+
+    def _list(
+        self,
+        config: RunnableConfig | None,
+        *,
+        filter: dict[str, Any] | None = None,
+        before: RunnableConfig | None = None,
+        limit: int | None = None,
+    ) -> list[CheckpointTuple]:
         """List checkpoints from the database.
 
         This method retrieves a list of checkpoint tuples from the MySQL database based
@@ -305,6 +330,7 @@ class BaseShallowSyncMySQLSaver(BaseMySQLSaver, Generic[_internal.C, _internal.R
         query = self.SELECT_SQL + where
         if limit:
             query += f" LIMIT {limit}"
+        checkpoints = []
         with self._cursor() as cur:
             cur.execute(self.SELECT_SQL + where, args)
             values = cur.fetchall()
@@ -321,22 +347,28 @@ class BaseShallowSyncMySQLSaver(BaseMySQLSaver, Generic[_internal.C, _internal.R
                     if pending_sends
                     else [],
                 }
-                yield CheckpointTuple(
-                    config={
-                        "configurable": {
-                            "thread_id": value["thread_id"],
-                            "checkpoint_ns": value["checkpoint_ns"],
-                            "checkpoint_id": checkpoint["id"],
-                        }
-                    },
-                    checkpoint=checkpoint,
-                    metadata=self._load_metadata(value["metadata"]),
-                    pending_writes=self._load_writes(
-                        deserialize_pending_writes(value["pending_writes"])
-                    ),
+                checkpoints.append(
+                    CheckpointTuple(
+                        config={
+                            "configurable": {
+                                "thread_id": value["thread_id"],
+                                "checkpoint_ns": value["checkpoint_ns"],
+                                "checkpoint_id": checkpoint["id"],
+                            }
+                        },
+                        checkpoint=checkpoint,
+                        metadata=self._load_metadata(value["metadata"]),
+                        pending_writes=self._load_writes(
+                            deserialize_pending_writes(value["pending_writes"])
+                        ),
+                    )
                 )
+        return checkpoints
 
     def get_tuple(self, config: RunnableConfig) -> CheckpointTuple | None:
+        return self._with_retry(self._get_tuple, config)
+
+    def _get_tuple(self, config: RunnableConfig) -> CheckpointTuple | None:
         """Get a checkpoint tuple from the database.
 
         This method retrieves a checkpoint tuple from the MySQL database based on the
@@ -409,6 +441,21 @@ class BaseShallowSyncMySQLSaver(BaseMySQLSaver, Generic[_internal.C, _internal.R
                 )
 
     def put(
+        self,
+        config: RunnableConfig,
+        checkpoint: Checkpoint,
+        metadata: CheckpointMetadata,
+        new_versions: ChannelVersions,
+    ) -> RunnableConfig:
+        return self._with_retry(
+            self._put,
+            config,
+            checkpoint,
+            metadata,
+            new_versions,
+        )
+
+    def _put(
         self,
         config: RunnableConfig,
         checkpoint: Checkpoint,
@@ -493,6 +540,21 @@ class BaseShallowSyncMySQLSaver(BaseMySQLSaver, Generic[_internal.C, _internal.R
         task_id: str,
         task_path: str = "",
     ) -> None:
+        return self._with_retry(
+            self._put_writes,
+            config,
+            writes,
+            task_id,
+            task_path,
+        )
+
+    def _put_writes(
+        self,
+        config: RunnableConfig,
+        writes: Sequence[tuple[str, Any]],
+        task_id: str,
+        task_path: str = "",
+    ) -> None:
         """Store intermediate writes linked to a checkpoint.
 
         This method saves intermediate writes associated with a checkpoint to the MySQL database.
@@ -521,7 +583,11 @@ class BaseShallowSyncMySQLSaver(BaseMySQLSaver, Generic[_internal.C, _internal.R
             )
 
 
-class BaseShallowAsyncMySQLSaver(BaseMySQLSaver, Generic[_ainternal.C, _ainternal.R]):
+class BaseShallowAsyncMySQLSaver(
+    _AsyncCheckpointRetryMixin,
+    BaseMySQLSaver,
+    Generic[_ainternal.C, _ainternal.R],
+):
     """A checkpoint saver that uses MySQL to store checkpoints asynchronously.
     This checkpointer ONLY stores the most recent checkpoint and does NOT retain any history.
     It is meant to be a light-weight drop-in replacement for the async MySQL saver that
@@ -607,6 +673,24 @@ class BaseShallowAsyncMySQLSaver(BaseMySQLSaver, Generic[_ainternal.C, _ainterna
         before: RunnableConfig | None = None,
         limit: int | None = None,
     ) -> AsyncIterator[CheckpointTuple]:
+        results = await self._with_retry(
+            self._alist,
+            config,
+            filter=filter,
+            before=before,
+            limit=limit,
+        )
+        for result in results:
+            yield result
+
+    async def _alist(
+        self,
+        config: RunnableConfig | None,
+        *,
+        filter: dict[str, Any] | None = None,
+        before: RunnableConfig | None = None,
+        limit: int | None = None,
+    ) -> list[CheckpointTuple]:
         """List checkpoints from the database asynchronously.
         This method retrieves a list of checkpoint tuples from the MySQL database based
         on the provided config. For shallow savers, this method returns a list with
@@ -616,6 +700,7 @@ class BaseShallowAsyncMySQLSaver(BaseMySQLSaver, Generic[_ainternal.C, _ainterna
         query = self.SELECT_SQL + where
         if limit:
             query += f" LIMIT {limit}"
+        checkpoints = []
         async with self._cursor() as cur:
             await cur.execute(self.SELECT_SQL + where, args)
             async for value in cur:
@@ -631,23 +716,29 @@ class BaseShallowAsyncMySQLSaver(BaseMySQLSaver, Generic[_ainternal.C, _ainterna
                     if pending_sends
                     else [],
                 }
-                yield CheckpointTuple(
-                    config={
-                        "configurable": {
-                            "thread_id": value["thread_id"],
-                            "checkpoint_ns": value["checkpoint_ns"],
-                            "checkpoint_id": checkpoint["id"],
-                        }
-                    },
-                    checkpoint=checkpoint,
-                    metadata=self._load_metadata(value["metadata"]),
-                    pending_writes=await asyncio.to_thread(
-                        self._load_writes,
-                        deserialize_pending_writes(value["pending_writes"]),
+                checkpoints.append(
+                    CheckpointTuple(
+                        config={
+                            "configurable": {
+                                "thread_id": value["thread_id"],
+                                "checkpoint_ns": value["checkpoint_ns"],
+                                "checkpoint_id": checkpoint["id"],
+                            }
+                        },
+                        checkpoint=checkpoint,
+                        metadata=self._load_metadata(value["metadata"]),
+                        pending_writes=await asyncio.to_thread(
+                            self._load_writes,
+                            deserialize_pending_writes(value["pending_writes"]),
+                        ),
                     ),
                 )
+        return checkpoints
 
     async def aget_tuple(self, config: RunnableConfig) -> CheckpointTuple | None:
+        return await self._with_retry(self._aget_tuple, config)
+
+    async def _aget_tuple(self, config: RunnableConfig) -> CheckpointTuple | None:
         """Get a checkpoint tuple from the database asynchronously.
         This method retrieves a checkpoint tuple from the MySQL database based on the
         provided config (matching the thread ID in the config).
@@ -697,6 +788,21 @@ class BaseShallowAsyncMySQLSaver(BaseMySQLSaver, Generic[_ainternal.C, _ainterna
                 )
 
     async def aput(
+        self,
+        config: RunnableConfig,
+        checkpoint: Checkpoint,
+        metadata: CheckpointMetadata,
+        new_versions: ChannelVersions,
+    ) -> RunnableConfig:
+        return await self._with_retry(
+            self._aput,
+            config,
+            checkpoint,
+            metadata,
+            new_versions,
+        )
+
+    async def _aput(
         self,
         config: RunnableConfig,
         checkpoint: Checkpoint,
@@ -762,6 +868,21 @@ class BaseShallowAsyncMySQLSaver(BaseMySQLSaver, Generic[_ainternal.C, _ainterna
         return next_config
 
     async def aput_writes(
+        self,
+        config: RunnableConfig,
+        writes: Sequence[tuple[str, Any]],
+        task_id: str,
+        task_path: str = "",
+    ) -> None:
+        return await self._with_retry(
+            self._aput_writes,
+            config,
+            writes,
+            task_id,
+            task_path,
+        )
+
+    async def _aput_writes(
         self,
         config: RunnableConfig,
         writes: Sequence[tuple[str, Any]],
