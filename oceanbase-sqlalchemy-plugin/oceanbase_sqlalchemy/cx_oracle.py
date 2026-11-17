@@ -1,20 +1,19 @@
-# -*- coding: utf-8 -*-
 """
 OceanBase dialect for cx_oracle driver.
 """
 
-from sqlalchemy.dialects.oracle.cx_oracle import (
-    OracleDialect_cx_oracle,
-    OracleCompiler_cx_oracle,
-)
-from sqlalchemy.dialects.oracle.base import OracleCompiler
-from sqlalchemy import select, and_, or_, bindparam, sql
-from functools import lru_cache
-from sqlalchemy.engine import reflection
 import urllib.parse
+from functools import lru_cache
 
 # SQLAlchemy version compatibility
 import sqlalchemy
+from sqlalchemy import and_, bindparam, or_, select, sql
+from sqlalchemy.dialects.oracle.base import OracleCompiler
+from sqlalchemy.dialects.oracle.cx_oracle import (
+    OracleCompiler_cx_oracle,
+    OracleDialect_cx_oracle,
+)
+from sqlalchemy.engine import reflection
 
 SA_VERSION = sqlalchemy.__version__
 SA_20_PLUS = SA_VERSION.startswith("2.")
@@ -33,36 +32,28 @@ class OceanBaseCompiler_cx_oracle(OracleCompiler_cx_oracle):
     """
     Custom compiler for OceanBase to handle bind parameter naming.
 
-    OceanBase does not support quoted bind parameter names (e.g., :"start")
-    like Oracle does. This compiler disables bind parameter quoting and
-    normalizes numeric-leading parameter names to match SQLAlchemy 2.0 behavior.
+    Keep ASCII bind names, including reserved words, unquoted for OceanBase.
+    Preserve Oracle's Unicode quoting and parameter-key mapping for drivers
+    that require quoted non-ASCII bind names.
     """
 
     def bindparam_string(self, name, **kw):
         """
-        Override bindparam_string to disable quoting and normalize parameter names.
+        Restore Oracle's non-ASCII bind handling without changing ASCII binds.
 
-        Issues:
-        1. SQLAlchemy's Oracle dialect quotes bind parameter names that are
-           reserved words (e.g., :start becomes :"start"). Oracle supports this,
-           but OceanBase raises OBE-01036: illegal variable name/number.
-        2. SQLAlchemy 1.3 doesn't handle numeric-leading parameter names
-           (e.g., :123start), but SQLAlchemy 2.0+ does (converts to :D123start).
-
-        Solution:
-        1. Skip the quoting branch entirely (don't quote reserved words)
-        2. Normalize parameter names that start with digits or underscores
-           by prefixing with "D" (following SQLAlchemy 2.0 convention)
+        Delegating keeps quoted SQL placeholders and DBAPI parameter keys in
+        sync on both SQLAlchemy 1.3 and 2.x. ASCII names retain the reserved-word
+        fix and the existing version-specific prefix normalization.
         """
-        # Step 1: Normalize parameter names (handle numeric/underscore prefixes)
-        # Only for SQLAlchemy 2.x, as 1.3 doesn't handle this and will cause errors
+        if not name.isascii():
+            return super().bindparam_string(name, **kw)
+
         if SA_20_PLUS:
             escaped_from = kw.get("escaped_from", None)
-            if not escaped_from:
-                if name and (name[0].isdigit() or name[0] == "_"):
-                    new_name = "D" + name
-                    kw["escaped_from"] = name
-                    name = new_name
+            if not escaped_from and name and (name[0].isdigit() or name[0] == "_"):
+                new_name = "D" + name
+                kw["escaped_from"] = name
+                name = new_name
 
         return OracleCompiler.bindparam_string(self, name, **kw)
 
@@ -75,11 +66,15 @@ class OceanBaseDialect_cx_oracle(OracleDialect_cx_oracle):
     name = "oceanbase"
     driver = "cx_oracle"
 
-    # Use custom compiler that doesn't quote bind parameter names
+    # Keep ASCII bind names unquoted while preserving Unicode bind compatibility
     statement_compiler = OceanBaseCompiler_cx_oracle
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        # Keep bounded query caches on the dialect instance so discarded
+        # engines/dialects are not retained by a class-level method cache.
+        self._constraint_query = lru_cache(maxsize=128)(self._constraint_query)
+        self._index_query = lru_cache(maxsize=128)(self._index_query)
 
     @property
     def _supports_except_all(self):
@@ -183,7 +178,6 @@ class OceanBaseDialect_cx_oracle(OracleDialect_cx_oracle):
         constraint_data = rp.fetchall()
         return constraint_data
 
-    @lru_cache()
     def _constraint_query(self, owner):
         local = dictionary.all_cons_columns.alias("local")
         remote = dictionary.all_cons_columns.alias("remote")
@@ -235,7 +229,6 @@ class OceanBaseDialect_cx_oracle(OracleDialect_cx_oracle):
             )
         )
 
-    @lru_cache()
     def _index_query(self, owner):
         """
         Override _index_query to optimize performance in OceanBase Oracle mode.
@@ -246,7 +239,13 @@ class OceanBaseDialect_cx_oracle(OracleDialect_cx_oracle):
         Only for sqlalchemy 2.x compatibility.
         """
         if not _dictionary_has_ind_expressions:
-            return super()._index_query(owner)
+            parent_query = super()._index_query
+            # The instance cache already owns this result. Avoid retaining
+            # this dialect in SQLAlchemy's class-level LRU cache as well.
+            uncached_query = getattr(parent_query, "__wrapped__", None)
+            if uncached_query is not None:
+                return uncached_query(self, owner)
+            return parent_query(owner)
         return (
             select(
                 dictionary.all_ind_columns.c.table_name,

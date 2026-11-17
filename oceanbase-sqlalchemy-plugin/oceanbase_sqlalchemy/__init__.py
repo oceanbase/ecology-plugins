@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 SQLAlchemy dialect for OceanBase Oracle mode.
 
@@ -7,8 +6,8 @@ optimizations and features for cx_oracle driver.
 """
 
 # Import the cx_oracle dialect class
-from .cx_oracle import OceanBaseDialect_cx_oracle
 from .cx_oceanbase import OceanBaseDialect_cx_oceanbase
+from .cx_oracle import OceanBaseDialect_cx_oracle
 
 # Manually register the dialect for SQLAlchemy 2.0 compatibility
 try:

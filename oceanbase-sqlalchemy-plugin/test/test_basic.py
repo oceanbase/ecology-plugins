@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Basic tests for OceanBase SQLAlchemy dialect
 """
@@ -47,13 +46,14 @@ class TestOceanBaseDialect(fixtures.TestBase):
 
     def test_engine_creation(self):
         """Test engine creation with OceanBase dialect."""
-        # This test will only work if OceanBase is available
+        # Skip missing drivers or dialects; unexpected implementation errors
+        # must fail the test instead of being mistaken for an unavailable DB.
         try:
             engine = create_engine(
                 "oceanbase+cx_oracle://test:test@localhost:2881/?service_name=test"
             )
             assert engine.dialect.name == "oceanbase"
-        except Exception as e:
+        except (ImportError, sa.exc.NoSuchModuleError) as e:
             pytest.skip(f"OceanBase not available: {e}")
 
     def test_sql_generation(self):
