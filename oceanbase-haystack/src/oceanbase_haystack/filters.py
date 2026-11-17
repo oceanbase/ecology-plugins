@@ -2,8 +2,10 @@
 # SPDX-License-Identifier: Apache-2.0
 """Translate Haystack filter dicts into SQL predicates for a JSON ``meta`` column (same shape as milvus-haystack)."""
 
+from __future__ import annotations
+
 import json
-from typing import Any, Dict, Union
+from typing import Any, Union
 
 from haystack.errors import FilterError
 
@@ -17,8 +19,7 @@ def _escape_sql_string(value: str) -> str:
 
 
 def _json_path_from_field(field: str) -> str:
-    if field.startswith("meta."):
-        field = field[5:]
+    field = field.removeprefix("meta.")
     return "$." + field if field else "$"
 
 
@@ -27,13 +28,13 @@ def _json_extract_sql(meta_column: str, field: str) -> str:
     return f"JSON_EXTRACT(`{meta_column}`, '{path}')"
 
 
-def _value_to_json_cast(value: Union[int, float, str, bool, None]) -> str:
+def _value_to_json_cast(value: Union[float, str, bool, None]) -> str:
     """Render a Python value as ``CAST(... AS JSON)`` for comparison with ``JSON_EXTRACT``."""
     dumped = json.dumps(value)
     return f"CAST('{_escape_sql_string(dumped)}' AS JSON)"
 
 
-def _value_to_sql(value: Union[int, float, str, list, bool, None]) -> str:
+def _value_to_sql(value: Union[float, str, list, bool, None]) -> str:
     if isinstance(value, list):
         parts = []
         for item in value:
@@ -42,7 +43,7 @@ def _value_to_sql(value: Union[int, float, str, list, bool, None]) -> str:
     return _value_to_json_cast(value)
 
 
-def parse_filters_to_sql(meta_column: str, filters: Dict[str, Any]) -> str:
+def parse_filters_to_sql(meta_column: str, filters: dict[str, Any]) -> str:
     """
     Turn a Haystack filter dict into a SQL expression for use in a ``WHERE`` clause (without the ``WHERE`` keyword).
 
@@ -57,7 +58,7 @@ def parse_filters_to_sql(meta_column: str, filters: Dict[str, Any]) -> str:
     return _parse_logic(meta_column, filters)
 
 
-def _parse_comparison(meta_column: str, filters: Dict[str, Any]) -> str:
+def _parse_comparison(meta_column: str, filters: dict[str, Any]) -> str:
     try:
         _assert_comparison_filter(filters)
     except AssertionError as assert_e:
@@ -84,14 +85,14 @@ def _parse_comparison(meta_column: str, filters: Dict[str, Any]) -> str:
     raise FilterError(msg)
 
 
-def _assert_comparison_filter(filters: Dict[str, Any]) -> None:
-    assert "operator" in filters, "operator must be specified in filters"  # noqa: S101
-    assert "field" in filters, "field must be specified in filters"  # noqa: S101
-    assert "value" in filters, "value must be specified in filters"  # noqa: S101
-    assert filters["operator"] in COMPARISON_OPERATORS, f"operator must be one of: {COMPARISON_OPERATORS}"  # noqa: S101
+def _assert_comparison_filter(filters: dict[str, Any]) -> None:
+    assert "operator" in filters, "operator must be specified in filters"
+    assert "field" in filters, "field must be specified in filters"
+    assert "value" in filters, "value must be specified in filters"
+    assert filters["operator"] in COMPARISON_OPERATORS, f"operator must be one of: {COMPARISON_OPERATORS}"
 
 
-def _parse_logic(meta_column: str, filters: Dict[str, Any]) -> str:
+def _parse_logic(meta_column: str, filters: dict[str, Any]) -> str:
     try:
         _assert_logic_filter(filters)
     except AssertionError as assert_e:
@@ -105,8 +106,8 @@ def _parse_logic(meta_column: str, filters: Dict[str, Any]) -> str:
     return "(" + operator.join(parts) + ")"
 
 
-def _assert_logic_filter(filters: Dict[str, Any]) -> None:
-    assert "operator" in filters, "operator must be specified in filters"  # noqa: S101
-    assert "conditions" in filters, "conditions must be specified in filters"  # noqa: S101
-    assert filters["operator"] in LOGIC_OPERATORS, f"operator must be one of: {LOGIC_OPERATORS}"  # noqa: S101
-    assert isinstance(filters["conditions"], list), "conditions must be a list"  # noqa: S101
+def _assert_logic_filter(filters: dict[str, Any]) -> None:
+    assert "operator" in filters, "operator must be specified in filters"
+    assert "conditions" in filters, "conditions must be specified in filters"
+    assert filters["operator"] in LOGIC_OPERATORS, f"operator must be one of: {LOGIC_OPERATORS}"
+    assert isinstance(filters["conditions"], list), "conditions must be a list"

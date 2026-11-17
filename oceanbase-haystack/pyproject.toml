@@ -52,3 +52,7 @@ markers = [
 [tool.ruff]
 line-length = 120
 target-version = "py39"
+
+[tool.ruff.lint.pyupgrade]
+# Haystack evaluates component annotations at runtime; keep unions that Python 3.9 can resolve.
+keep-runtime-typing = true

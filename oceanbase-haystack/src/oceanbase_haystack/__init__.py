@@ -9,8 +9,8 @@ from .oceanbase_embedding_retriever import (
 
 __all__ = [
     "OceanBaseDocumentStore",
-    "OceanBaseStoreError",
     "OceanBaseEmbeddingRetriever",
     "OceanBaseHybridRetriever",
     "OceanBaseSparseEmbeddingRetriever",
+    "OceanBaseStoreError",
 ]

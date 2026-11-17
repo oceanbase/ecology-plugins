@@ -5,7 +5,6 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from oceanbase_haystack.document_store import OceanBaseDocumentStore
-
 from tests.constants import CONNECTION_ARGS, DEFAULT_INDEX_PARAMS
 
 

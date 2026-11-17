@@ -46,13 +46,15 @@ def test_builtin_function_not_supported():
 
 def test_invalid_index_type():
     mock_ob = MagicMock()
-    with patch.object(OceanBaseDocumentStore, "_create_client", return_value=mock_ob):
-        with pytest.raises(OceanBaseStoreError, match="index_type"):
-            OceanBaseDocumentStore(
-                connection_args=CONNECTION_ARGS,
-                index_params=DEFAULT_INDEX_PARAMS,
-                index_type="NOT_A_REAL_INDEX",
-            )
+    with (
+        patch.object(OceanBaseDocumentStore, "_create_client", return_value=mock_ob),
+        pytest.raises(OceanBaseStoreError, match="index_type"),
+    ):
+        OceanBaseDocumentStore(
+            connection_args=CONNECTION_ARGS,
+            index_params=DEFAULT_INDEX_PARAMS,
+            index_type="NOT_A_REAL_INDEX",
+        )
 
 
 def test_count_documents_no_table(document_store: OceanBaseDocumentStore, mock_obvector: MagicMock):
@@ -104,6 +106,16 @@ def test_discard_invalid_meta_drops_non_json_values(document_store: OceanBaseDoc
     OceanBaseDocumentStore._discard_invalid_meta(doc)
     assert "bad" not in (doc.meta or {})
     assert doc.meta.get("ok") == 1
+
+
+@pytest.mark.parametrize("invalid_document", [None, {}, "not a document"])
+def test_invalid_document_type_rejected_before_write(document_store, mock_obvector, invalid_document):
+    documents = [Document(id="valid", content="x"), invalid_document]
+    with pytest.raises(TypeError, match="Invalid document type"):
+        document_store.write_documents(documents)
+
+    mock_obvector.create_table_with_index_params.assert_not_called()
+    mock_obvector.upsert.assert_not_called()
 
 
 def test_select_score_fn_l2(document_store: OceanBaseDocumentStore):
