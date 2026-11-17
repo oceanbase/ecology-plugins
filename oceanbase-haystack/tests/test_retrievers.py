@@ -1,9 +1,11 @@
 """Tests for Haystack retriever components (mocked document store)."""
 
+from typing import get_args, get_origin, get_type_hints
 from unittest.mock import MagicMock, patch
 
 import pytest
 from haystack import DeserializationError, Document
+from haystack.dataclasses.sparse_embedding import SparseEmbedding
 
 from oceanbase_haystack.document_store import OceanBaseDocumentStore, OceanBaseStoreError
 from oceanbase_haystack.oceanbase_embedding_retriever import (
@@ -11,8 +13,6 @@ from oceanbase_haystack.oceanbase_embedding_retriever import (
     OceanBaseHybridRetriever,
     OceanBaseSparseEmbeddingRetriever,
 )
-from haystack.dataclasses.sparse_embedding import SparseEmbedding
-
 from tests.constants import CONNECTION_ARGS, DEFAULT_INDEX_PARAMS
 
 
@@ -45,16 +45,18 @@ def test_embedding_retriever_top_k_override(store: OceanBaseDocumentStore):
 
 def test_sparse_retriever_requires_query_sparse(mock_obvector: MagicMock):
     mock_obvector.check_table_exists.return_value = False
-    with patch.object(OceanBaseDocumentStore, "_create_client", return_value=mock_obvector):
-        with patch.object(OceanBaseDocumentStore, "_create_table_with_dim"):
-            with patch.object(OceanBaseDocumentStore, "_reflect_table"):
-                s = OceanBaseDocumentStore(
-                    collection_name="t",
-                    connection_args=CONNECTION_ARGS,
-                    index_params=DEFAULT_INDEX_PARAMS,
-                    sparse_vector_field="sparse_col",
-                    embedding_dim=4,
-                )
+    with (
+        patch.object(OceanBaseDocumentStore, "_create_client", return_value=mock_obvector),
+        patch.object(OceanBaseDocumentStore, "_create_table_with_dim"),
+        patch.object(OceanBaseDocumentStore, "_reflect_table"),
+    ):
+        s = OceanBaseDocumentStore(
+            collection_name="t",
+            connection_args=CONNECTION_ARGS,
+            index_params=DEFAULT_INDEX_PARAMS,
+            sparse_vector_field="sparse_col",
+            embedding_dim=4,
+        )
     r = OceanBaseSparseEmbeddingRetriever(document_store=s)
     with pytest.raises(OceanBaseStoreError, match="query_sparse_embedding"):
         r.run(query_sparse_embedding=None)
@@ -86,21 +88,25 @@ def test_embedding_retriever_to_dict_roundtrip(store: OceanBaseDocumentStore, mo
 
 def test_hybrid_retriever_falls_back_to_dense_when_no_sparse(mock_obvector: MagicMock):
     mock_obvector.check_table_exists.return_value = False
-    with patch.object(OceanBaseDocumentStore, "_create_client", return_value=mock_obvector):
-        with patch.object(OceanBaseDocumentStore, "_create_table_with_dim"):
-            with patch.object(OceanBaseDocumentStore, "_reflect_table"):
-                s = OceanBaseDocumentStore(
-                    collection_name="t",
-                    connection_args=CONNECTION_ARGS,
-                    index_params=DEFAULT_INDEX_PARAMS,
-                    sparse_vector_field="sp",
-                    embedding_dim=4,
-                )
+    with (
+        patch.object(OceanBaseDocumentStore, "_create_client", return_value=mock_obvector),
+        patch.object(OceanBaseDocumentStore, "_create_table_with_dim"),
+        patch.object(OceanBaseDocumentStore, "_reflect_table"),
+    ):
+        s = OceanBaseDocumentStore(
+            collection_name="t",
+            connection_args=CONNECTION_ARGS,
+            index_params=DEFAULT_INDEX_PARAMS,
+            sparse_vector_field="sp",
+            embedding_dim=4,
+        )
     doc = Document(id="a", content="x")
-    with patch.object(s, "_embedding_retrieval", return_value=[doc]) as d_ret:
-        with patch.object(s, "_sparse_embedding_retrieval") as s_ret:
-            r = OceanBaseHybridRetriever(document_store=s)
-            out = r.run(query_embedding=[0.1, 0.2], query_sparse_embedding=None)
+    with (
+        patch.object(s, "_embedding_retrieval", return_value=[doc]) as d_ret,
+        patch.object(s, "_sparse_embedding_retrieval") as s_ret,
+    ):
+        r = OceanBaseHybridRetriever(document_store=s)
+        out = r.run(query_embedding=[0.1, 0.2], query_sparse_embedding=None)
     s_ret.assert_not_called()
     d_ret.assert_called_once()
     assert out["documents"] == [doc]
@@ -108,21 +114,35 @@ def test_hybrid_retriever_falls_back_to_dense_when_no_sparse(mock_obvector: Magi
 
 def test_hybrid_retriever_with_sparse_calls_rrf(mock_obvector: MagicMock):
     mock_obvector.check_table_exists.return_value = False
-    with patch.object(OceanBaseDocumentStore, "_create_client", return_value=mock_obvector):
-        with patch.object(OceanBaseDocumentStore, "_create_table_with_dim"):
-            with patch.object(OceanBaseDocumentStore, "_reflect_table"):
-                s = OceanBaseDocumentStore(
-                    collection_name="t",
-                    connection_args=CONNECTION_ARGS,
-                    index_params=DEFAULT_INDEX_PARAMS,
-                    sparse_vector_field="sp",
-                    embedding_dim=4,
-                )
+    with (
+        patch.object(OceanBaseDocumentStore, "_create_client", return_value=mock_obvector),
+        patch.object(OceanBaseDocumentStore, "_create_table_with_dim"),
+        patch.object(OceanBaseDocumentStore, "_reflect_table"),
+    ):
+        s = OceanBaseDocumentStore(
+            collection_name="t",
+            connection_args=CONNECTION_ARGS,
+            index_params=DEFAULT_INDEX_PARAMS,
+            sparse_vector_field="sp",
+            embedding_dim=4,
+        )
     d1 = Document(id="1", content="a")
     d2 = Document(id="2", content="b")
     sp = SparseEmbedding(indices=[0], values=[1.0])
-    with patch.object(s, "_embedding_retrieval", return_value=[d1]):
-        with patch.object(s, "_sparse_embedding_retrieval", return_value=[d2]):
-            r = OceanBaseHybridRetriever(document_store=s)
-            out = r.run(query_embedding=[0.1], query_sparse_embedding=sp)
+    with (
+        patch.object(s, "_embedding_retrieval", return_value=[d1]),
+        patch.object(s, "_sparse_embedding_retrieval", return_value=[d2]),
+    ):
+        r = OceanBaseHybridRetriever(document_store=s)
+        out = r.run(query_embedding=[0.1], query_sparse_embedding=sp)
     assert len(out["documents"]) >= 1
+
+
+@pytest.mark.parametrize(
+    "retriever_type",
+    [OceanBaseEmbeddingRetriever, OceanBaseSparseEmbeddingRetriever, OceanBaseHybridRetriever],
+)
+def test_run_annotations_resolve_at_runtime(retriever_type):
+    hints = get_type_hints(retriever_type.run)
+    assert get_args(hints["top_k"]) == (int, type(None))
+    assert get_origin(get_args(hints["filters"])[0]) is dict

@@ -1,16 +1,17 @@
 """OceanBase-backed Haystack document store (pyobvector / SQL vector table)."""
 
+from __future__ import annotations
+
 import json
 import logging
 import math
 from copy import deepcopy
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any, Callable, Optional
 
 from haystack import Document, default_from_dict, default_to_dict
 from haystack.dataclasses.sparse_embedding import SparseEmbedding
 from haystack.document_stores.errors import DocumentStoreError
 from haystack.document_stores.types import DuplicatePolicy
-from haystack.errors import FilterError
 from haystack.utils import Secret, deserialize_secrets_inplace
 from pyobvector import (
     SPARSE_VECTOR,
@@ -34,7 +35,7 @@ class OceanBaseStoreError(DocumentStoreError):
     pass
 
 
-DEFAULT_OCEANBASE_CONNECTION: Dict[str, Any] = {
+DEFAULT_OCEANBASE_CONNECTION: dict[str, Any] = {
     "host": "localhost",
     "port": "2881",
     "user": "root@test",
@@ -95,18 +96,18 @@ def _distance_fn(metric: str) -> Callable[..., Any]:
 
 
 def _rrf_merge(
-    ranked_lists: List[List[Document]],
+    ranked_lists: list[list[Document]],
     k: int = 60,
     top_k: int = 10,
-) -> List[Document]:
-    scores: Dict[str, float] = {}
-    by_id: Dict[str, Document] = {}
+) -> list[Document]:
+    scores: dict[str, float] = {}
+    by_id: dict[str, Document] = {}
     for docs in ranked_lists:
         for rank, doc in enumerate(docs):
             by_id[doc.id] = doc
             scores[doc.id] = scores.get(doc.id, 0.0) + 1.0 / (k + rank + 1)
     ordered = sorted(scores.keys(), key=lambda i: scores[i], reverse=True)
-    out: List[Document] = []
+    out: list[Document] = []
     for doc_id in ordered[:top_k]:
         d = by_id[doc_id]
         d.score = scores[doc_id]
@@ -124,7 +125,7 @@ class OceanBaseDocumentStore:
     def __init__(
         self,
         collection_name: str = "HaystackCollection",
-        connection_args: Optional[Dict[str, Any]] = None,
+        connection_args: Optional[dict[str, Any]] = None,
         *,
         drop_old: bool = False,
         primary_field: str = PRIMARY_FIELD,
@@ -139,7 +140,7 @@ class OceanBaseDocumentStore:
         embedding_dim: Optional[int] = None,
         vidx_metric_type: Optional[str] = None,
         index_type: Optional[str] = None,
-        vidx_algo_params: Optional[Dict[str, Any]] = None,
+        vidx_algo_params: Optional[dict[str, Any]] = None,
         builtin_function: Any = None,
         **kwargs: Any,
     ) -> None:
@@ -249,7 +250,7 @@ class OceanBaseDocumentStore:
 
         if self._sparse_vector_field:
             cols.append(Column(self._sparse_vector_field, SPARSE_VECTOR()))
-            sparse_kwargs: Dict[str, Any] = {}
+            sparse_kwargs: dict[str, Any] = {}
             if getattr(self._obvector, "_is_seekdb", lambda: False)():
                 sparse_kwargs["sparse_index_type"] = "sindi"
             vidx_params.add_index(
@@ -296,27 +297,22 @@ class OceanBaseDocumentStore:
             row = conn.execute(text(sql)).fetchone()
         return int(row[0]) if row else 0
 
-    def filter_documents(self, filters: Optional[Dict[str, Any]] = None) -> List[Document]:
+    def filter_documents(self, filters: Optional[dict[str, Any]] = None) -> list[Document]:
         if not self._obvector.check_table_exists(self.collection_name):
             return []
         cols = f"`{self._primary_field}`, `{self._text_field}`, `{self._vector_field}`, `{self._meta_field}`"
         if not filters:
             where = "1=1"
         else:
-            try:
-                where = parse_filters_to_sql(self._meta_field, filters)
-            except FilterError:
-                raise
+            where = parse_filters_to_sql(self._meta_field, filters)
         sql = f"SELECT {cols} FROM `{self.collection_name}` WHERE {where} LIMIT {MAX_LIMIT_SIZE}"
         with self._obvector.engine.connect() as conn:
             res = conn.execute(text(sql)).fetchall()
         return [self._row_to_document(dict(row._mapping)) for row in res]
 
-    def write_documents(self, documents: List[Document], policy: DuplicatePolicy = DuplicatePolicy.NONE) -> int:
+    def write_documents(self, documents: list[Document], policy: DuplicatePolicy = DuplicatePolicy.NONE) -> int:
         documents_cp = [deepcopy(d) for d in documents]
         documents_cp = [OceanBaseDocumentStore._discard_invalid_meta(doc) for doc in documents_cp]
-        if len(documents_cp) > 0 and not isinstance(documents_cp[0], Document):
-            raise ValueError("param 'documents' must contain a list of objects of type Document")
 
         if policy not in [DuplicatePolicy.NONE]:
             logger.warning(
@@ -353,9 +349,9 @@ class OceanBaseDocumentStore:
 
         self._ensure_table(embedding_dim)
 
-        data: List[Dict[str, Any]] = []
+        data: list[dict[str, Any]] = []
         for doc in documents_cp:
-            row: Dict[str, Any] = {
+            row: dict[str, Any] = {
                 self._primary_field: doc.id,
                 self._text_field: doc.content,
                 self._vector_field: self._normalize_vec(doc.embedding) if self.normalize else doc.embedding,
@@ -376,15 +372,15 @@ class OceanBaseDocumentStore:
             total += len(batch)
         return total
 
-    def delete_documents(self, document_ids: List[str]) -> None:
+    def delete_documents(self, document_ids: list[str]) -> None:
         if not document_ids:
             return
         if not self._obvector.check_table_exists(self.collection_name):
             return
         self._obvector.delete(table_name=self.collection_name, ids=document_ids)
 
-    def to_dict(self) -> Dict[str, Any]:
-        new_connection_args: Dict[str, Any] = {}
+    def to_dict(self) -> dict[str, Any]:
+        new_connection_args: dict[str, Any] = {}
         for k, v in self.connection_args.items():
             if isinstance(v, Secret):
                 new_connection_args[k] = v.to_dict()
@@ -411,13 +407,13 @@ class OceanBaseDocumentStore:
         return default_to_dict(self, **init_parameters)
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "OceanBaseDocumentStore":
+    def from_dict(cls, data: dict[str, Any]) -> OceanBaseDocumentStore:
         for conn_arg_key, conn_arg_value in data["init_parameters"]["connection_args"].items():
             if isinstance(conn_arg_value, dict) and conn_arg_value.get("type") == "env_var":
                 deserialize_secrets_inplace(data["init_parameters"]["connection_args"], keys=[conn_arg_key])
         return default_from_dict(cls, data)
 
-    def _normalize_vec(self, emb: List[float]) -> List[float]:
+    def _normalize_vec(self, emb: list[float]) -> list[float]:
         norm = math.sqrt(sum(x * x for x in emb))
         if norm == 0:
             return emb
@@ -431,11 +427,11 @@ class OceanBaseDocumentStore:
 
     def _embedding_retrieval(
         self,
-        query_embedding: List[float],
-        filters: Optional[Dict[str, Any]] = None,
+        query_embedding: list[float],
+        filters: Optional[dict[str, Any]] = None,
         top_k: int = 10,
         query_text: Optional[str] = None,
-    ) -> List[Document]:
+    ) -> list[Document]:
         _ = query_text
         if not self._obvector.check_table_exists(self.collection_name):
             return []
@@ -457,7 +453,7 @@ class OceanBaseDocumentStore:
             where_clause=([text(fltr)] if fltr else None),
         )
         rows = res.fetchall()
-        docs: List[Document] = []
+        docs: list[Document] = []
         score_fn = self._select_score_fn()
         for r in rows:
             content = r[0]
@@ -473,10 +469,10 @@ class OceanBaseDocumentStore:
     def _sparse_embedding_retrieval(
         self,
         query_sparse_embedding: SparseEmbedding,
-        filters: Optional[Dict[str, Any]] = None,
+        filters: Optional[dict[str, Any]] = None,
         top_k: int = 10,
         query_text: Optional[str] = None,
-    ) -> List[Document]:
+    ) -> list[Document]:
         _ = query_text
         if not self._sparse_vector_field:
             raise OceanBaseStoreError("Set sparse_vector_field on OceanBaseDocumentStore before sparse retrieval.")
@@ -500,7 +496,7 @@ class OceanBaseDocumentStore:
             where_clause=([text(fltr)] if fltr else None),
         )
         rows = res.fetchall()
-        docs: List[Document] = []
+        docs: list[Document] = []
         for r in rows:
             content = r[0]
             meta_raw = r[1]
@@ -514,13 +510,13 @@ class OceanBaseDocumentStore:
 
     def _hybrid_retrieval(
         self,
-        query_embedding: List[float],
+        query_embedding: list[float],
         query_sparse_embedding: Optional[SparseEmbedding] = None,
-        filters: Optional[Dict[str, Any]] = None,
+        filters: Optional[dict[str, Any]] = None,
         top_k: int = 10,
         reranker: Any = None,
         query_text: Optional[str] = None,
-    ) -> List[Document]:
+    ) -> list[Document]:
         _ = reranker
         if not self._sparse_vector_field:
             raise OceanBaseStoreError("Hybrid retrieval requires sparse_vector_field to be set.")
@@ -549,7 +545,7 @@ class OceanBaseDocumentStore:
             return _map_ip_to_similarity
         return lambda x: x
 
-    def _row_to_document(self, row: Dict[str, Any]) -> Document:
+    def _row_to_document(self, row: dict[str, Any]) -> Document:
         pid = row[self._primary_field]
         content = row[self._text_field]
         vec = row.get(self._vector_field)
@@ -563,7 +559,7 @@ class OceanBaseDocumentStore:
         doc = Document(id=str(pid), content=content, embedding=emb, meta=meta)
         return doc
 
-    def _parse_vector(self, vec: Any) -> Optional[List[float]]:
+    def _parse_vector(self, vec: Any) -> Optional[list[float]]:
         if vec is None:
             return None
         if isinstance(vec, (bytes, memoryview)):
@@ -577,7 +573,7 @@ class OceanBaseDocumentStore:
     @staticmethod
     def _discard_invalid_meta(document: Document) -> Document:
         if not isinstance(document, Document):
-            raise ValueError(f"Invalid document type: {type(document)}")
+            raise TypeError(f"Invalid document type: {type(document)}")
         if document.meta:
             new_meta = {}
             for key, value in document.meta.items():

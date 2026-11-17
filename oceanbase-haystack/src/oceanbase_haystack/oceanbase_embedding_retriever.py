@@ -1,6 +1,8 @@
 """Haystack retriever components for OceanBaseDocumentStore."""
 
-from typing import Any, Dict, List, Optional
+from __future__ import annotations
+
+from typing import Any, Optional
 
 from haystack import DeserializationError, Document, component, default_from_dict, default_to_dict
 from haystack.dataclasses.sparse_embedding import SparseEmbedding
@@ -13,19 +15,19 @@ class OceanBaseEmbeddingRetriever:
     """Dense vector retrieval from ``OceanBaseDocumentStore`` (same role as ``MilvusEmbeddingRetriever``)."""
 
     def __init__(
-        self, document_store: OceanBaseDocumentStore, filters: Optional[Dict[str, Any]] = None, top_k: int = 10
+        self, document_store: OceanBaseDocumentStore, filters: Optional[dict[str, Any]] = None, top_k: int = 10
     ):
         self.filters = filters
         self.top_k = top_k
         self.document_store = document_store
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return default_to_dict(
             self, document_store=self.document_store.to_dict(), filters=self.filters, top_k=self.top_k
         )
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "OceanBaseEmbeddingRetriever":
+    def from_dict(cls, data: dict[str, Any]) -> OceanBaseEmbeddingRetriever:
         init_params = data.get("init_parameters", {})
         if "document_store" not in init_params:
             raise DeserializationError("Missing 'document_store' in serialization data")
@@ -33,10 +35,10 @@ class OceanBaseEmbeddingRetriever:
         data["init_parameters"]["document_store"] = docstore
         return default_from_dict(cls, data)
 
-    @component.output_types(documents=List[Document])
+    @component.output_types(documents=list[Document])
     def run(
-        self, query_embedding: List[float], top_k: Optional[int] = None, filters: Optional[Dict[str, Any]] = None
-    ) -> Dict[str, List[Document]]:
+        self, query_embedding: list[float], top_k: Optional[int] = None, filters: Optional[dict[str, Any]] = None
+    ) -> dict[str, list[Document]]:
         docs = self.document_store._embedding_retrieval(
             query_embedding=query_embedding,
             top_k=top_k or self.top_k,
@@ -50,19 +52,19 @@ class OceanBaseSparseEmbeddingRetriever:
     """Sparse vector ANN search; requires ``sparse_vector_field`` on the document store."""
 
     def __init__(
-        self, document_store: OceanBaseDocumentStore, filters: Optional[Dict[str, Any]] = None, top_k: int = 10
+        self, document_store: OceanBaseDocumentStore, filters: Optional[dict[str, Any]] = None, top_k: int = 10
     ):
         self.filters = filters
         self.top_k = top_k
         self.document_store = document_store
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return default_to_dict(
             self, document_store=self.document_store.to_dict(), filters=self.filters, top_k=self.top_k
         )
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "OceanBaseSparseEmbeddingRetriever":
+    def from_dict(cls, data: dict[str, Any]) -> OceanBaseSparseEmbeddingRetriever:
         init_params = data.get("init_parameters", {})
         if "document_store" not in init_params:
             raise DeserializationError("Missing 'document_store' in serialization data")
@@ -70,14 +72,14 @@ class OceanBaseSparseEmbeddingRetriever:
         data["init_parameters"]["document_store"] = docstore
         return default_from_dict(cls, data)
 
-    @component.output_types(documents=List[Document])
+    @component.output_types(documents=list[Document])
     def run(
         self,
         query_sparse_embedding: Optional[SparseEmbedding] = None,
         query_text: Optional[str] = None,
         top_k: Optional[int] = None,
-        filters: Optional[Dict[str, Any]] = None,
-    ) -> Dict[str, List[Document]]:
+        filters: Optional[dict[str, Any]] = None,
+    ) -> dict[str, list[Document]]:
         if query_sparse_embedding is None:
             raise OceanBaseStoreError(
                 "query_sparse_embedding is required; Milvus BM25 built-in sparse search is not supported."
@@ -98,7 +100,7 @@ class OceanBaseHybridRetriever:
     def __init__(
         self,
         document_store: OceanBaseDocumentStore,
-        filters: Optional[Dict[str, Any]] = None,
+        filters: Optional[dict[str, Any]] = None,
         top_k: int = 10,
         reranker: Any = None,
     ):
@@ -107,7 +109,7 @@ class OceanBaseHybridRetriever:
         self.document_store = document_store
         self.reranker = reranker
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return default_to_dict(
             self,
             document_store=self.document_store.to_dict(),
@@ -116,7 +118,7 @@ class OceanBaseHybridRetriever:
         )
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "OceanBaseHybridRetriever":
+    def from_dict(cls, data: dict[str, Any]) -> OceanBaseHybridRetriever:
         init_params = data.get("init_parameters", {})
         if "document_store" not in init_params:
             raise DeserializationError("Missing 'document_store' in serialization data")
@@ -124,14 +126,14 @@ class OceanBaseHybridRetriever:
         data["init_parameters"]["document_store"] = docstore
         return default_from_dict(cls, data)
 
-    @component.output_types(documents=List[Document])
+    @component.output_types(documents=list[Document])
     def run(
         self,
-        query_embedding: List[float],
+        query_embedding: list[float],
         query_sparse_embedding: Optional[SparseEmbedding] = None,
         query_text: Optional[str] = None,
         top_k: Optional[int] = None,
-        filters: Optional[Dict[str, Any]] = None,
+        filters: Optional[dict[str, Any]] = None,
     ):
         docs = self.document_store._hybrid_retrieval(
             query_embedding=query_embedding,
