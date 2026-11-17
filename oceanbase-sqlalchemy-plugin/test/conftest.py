@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Pytest Configuration File - OceanBase Dialect Testing
 

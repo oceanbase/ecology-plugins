@@ -40,10 +40,10 @@ from oceanbase_sqlalchemy.utils import build_safe_connection_string
 # 构建连接字符串
 connection_string = build_safe_connection_string(
     username="your_username",
-    password="your_password", 
+    password="your_password",
     host="your_host",
     port="2881",
-    service_name="your_service_name"
+    service_name="your_service_name",
 )
 
 # 创建引擎
@@ -66,21 +66,23 @@ from oceanbase_sqlalchemy.utils import build_safe_connection_string
 connection_string = build_safe_connection_string(
     username="your_username",
     password="your_password",
-    host="your_host", 
+    host="your_host",
     port="2881",
-    service_name="your_service_name"
+    service_name="your_service_name",
 )
 engine = create_engine(connection_string)
 
 # 定义模型
 Base = declarative_base()
 
+
 class User(Base):
-    __tablename__ = 'users'
-    
+    __tablename__ = "users"
+
     id = Column(Integer, primary_key=True)
     name = Column(String(50))
     email = Column(String(100))
+
 
 # 创建表
 Base.metadata.create_all(engine)

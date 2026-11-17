@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 OceanBase Dialect Requirements
 
@@ -6,8 +5,8 @@ This file defines the capabilities and requirements for the OceanBase dialect,
 which extends SQLAlchemy's Oracle dialect with OceanBase-specific optimizations.
 """
 
-from sqlalchemy.testing.requirements import SuiteRequirements
 from sqlalchemy.testing import exclusions
+from sqlalchemy.testing.requirements import SuiteRequirements
 
 
 class Requirements(SuiteRequirements):

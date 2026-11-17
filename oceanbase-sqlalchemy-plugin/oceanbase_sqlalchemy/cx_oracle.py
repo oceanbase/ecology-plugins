@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 OceanBase dialect for cx_oracle driver.
 """
@@ -72,6 +71,10 @@ class OceanBaseDialect_cx_oracle(OracleDialect_cx_oracle):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        # Keep bounded query caches on the dialect instance so discarded
+        # engines/dialects are not retained by a class-level method cache.
+        self._constraint_query = lru_cache(maxsize=128)(self._constraint_query)
+        self._index_query = lru_cache(maxsize=128)(self._index_query)
 
     @property
     def _supports_except_all(self):
@@ -175,7 +178,6 @@ class OceanBaseDialect_cx_oracle(OracleDialect_cx_oracle):
         constraint_data = rp.fetchall()
         return constraint_data
 
-    @lru_cache()
     def _constraint_query(self, owner):
         local = dictionary.all_cons_columns.alias("local")
         remote = dictionary.all_cons_columns.alias("remote")
@@ -227,7 +229,6 @@ class OceanBaseDialect_cx_oracle(OracleDialect_cx_oracle):
             )
         )
 
-    @lru_cache()
     def _index_query(self, owner):
         """
         Override _index_query to optimize performance in OceanBase Oracle mode.
@@ -238,7 +239,13 @@ class OceanBaseDialect_cx_oracle(OracleDialect_cx_oracle):
         Only for sqlalchemy 2.x compatibility.
         """
         if not _dictionary_has_ind_expressions:
-            return super()._index_query(owner)
+            parent_query = super()._index_query
+            # The instance cache already owns this result. Avoid retaining
+            # this dialect in SQLAlchemy's class-level LRU cache as well.
+            uncached_query = getattr(parent_query, "__wrapped__", None)
+            if uncached_query is not None:
+                return uncached_query(self, owner)
+            return parent_query(owner)
         return (
             select(
                 dictionary.all_ind_columns.c.table_name,

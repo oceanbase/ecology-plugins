@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
 """
 OceanBase Dialect Optimization Task Testing
 
@@ -9,20 +7,21 @@ This file specifically tests whether the optimization tasks mentioned in Task.md
 3. Validate optimization effects through real database connections
 """
 
-import pytest
 import os
+
+import pytest
 from sqlalchemy import (
+    Column,
+    MetaData,
+    Numeric,
+    String,
+    Table,
     create_engine,
     inspect,
     text,
-    MetaData,
-    Table,
-    Column,
-    String,
-    Numeric,
 )
-from sqlalchemy.schema import CreateTable, DropTable
 from sqlalchemy.exc import OperationalError
+from sqlalchemy.schema import CreateTable, DropTable
 
 # Load .env file
 try:
@@ -32,7 +31,7 @@ try:
     print("✅ .env file loaded successfully")
 except ImportError:
     print("⚠️  python-dotenv not installed, unable to load .env file")
-except Exception as e:
+except (OSError, UnicodeError) as e:
     print(f"⚠️  Failed to load .env file: {e}")
 
 # Print current SQLAlchemy version
@@ -194,8 +193,6 @@ class TestOceanBaseOptimization:
                 pytest.skip("Skipping connection test: Username or password incorrect")
             else:
                 pytest.fail(f"OceanBase connection failed: {e}")
-        except Exception as e:
-            pytest.fail(f"Connection test exception: {e}")
 
 
 if __name__ == "__main__":
