@@ -39,7 +39,7 @@ def dictionary_inspector(dialect):
         owner, table_name, constraint_name, column_name, position
     );
     CREATE TABLE "all_tab_cols{suffix}" (
-        owner, table_name, column_name, data_type, char_length, data_precision,
+        owner, table_name, column_name, data_type, char_length, data_length, data_precision,
         data_scale, nullable, data_default, virtual_column, hidden_column, column_id
     );
     CREATE TABLE "all_col_comments{suffix}" (owner, table_name, column_name, comments);
@@ -57,9 +57,9 @@ def dictionary_inspector(dialect):
         ('APP', 'MixedCase', 'U_DEMO', 'NOT_PK', 1),
         ('OTHER', 'MixedCase', 'PK_DEMO', 'OTHER_ID', 1);
     INSERT INTO "all_tab_cols{suffix}" VALUES
-        ('APP', 'MixedCase', 'FIRST_IN_TABLE', 'NUMBER', NULL, 18, 0, 'N', NULL, 'NO', 'NO', 1),
-        ('APP', 'MixedCase', 'SecondInTable', 'DATE', NULL, NULL, NULL, 'N', 'SYSDATE', 'NO', 'NO', 2),
-        ('APP', 'MixedCase', 'HIDDEN_COL', 'NUMBER', NULL, NULL, NULL, 'Y', NULL, 'NO', 'YES', 3);
+        ('APP', 'MixedCase', 'FIRST_IN_TABLE', 'NUMBER', NULL, 22, 18, 0, 'N', NULL, 'NO', 'NO', 1),
+        ('APP', 'MixedCase', 'SecondInTable', 'DATE', NULL, 7, NULL, NULL, 'N', 'SYSDATE', 'NO', 'NO', 2),
+        ('APP', 'MixedCase', 'HIDDEN_COL', 'NUMBER', NULL, 22, NULL, NULL, 'Y', NULL, 'NO', 'YES', 3);
     INSERT INTO "all_col_comments{suffix}" VALUES
         ('APP', 'MixedCase', 'SecondInTable', 'Creation time');
     """
