@@ -20,6 +20,7 @@ SA_20_PLUS = SA_VERSION.startswith("2.")
 
 if SA_20_PLUS:
     from sqlalchemy.dialects.oracle import dictionary
+    from sqlalchemy.engine.reflection import ObjectKind, ObjectScope
 
     _dictionary_has_ind_expressions = (
         getattr(dictionary, "all_ind_expressions", None) is not None
@@ -177,6 +178,67 @@ class OceanBaseDialect_cx_oracle(OracleDialect_cx_oracle):
         rp = connection.execute(sql.text(text), **params)
         constraint_data = rp.fetchall()
         return constraint_data
+
+    @reflection.cache
+    def get_pk_constraint(self, connection, table_name, schema=None, **kw):
+        """Reflect a local object's primary key in one dictionary query."""
+        if not SA_20_PLUS or kw.get("oracle_resolve_synonyms") or kw.get("dblink"):
+            return super().get_pk_constraint(
+                connection, table_name, schema=schema, **kw
+            )
+
+        denormalize_schema = getattr(
+            self, "denormalize_schema_name", self.denormalize_name
+        )
+        owner = denormalize_schema(schema or self.default_schema_name)
+        objects = self._all_objects_query(
+            owner, ObjectScope.ANY, ObjectKind.ANY, True, False
+        ).subquery()
+        constraints = dictionary.all_constraints.c
+        columns = dictionary.all_cons_columns.c
+        query = (
+            select(
+                objects.c.object_name, constraints.constraint_name, columns.column_name
+            )
+            .select_from(objects)
+            .outerjoin(
+                dictionary.all_constraints,
+                and_(
+                    constraints.owner == owner,
+                    constraints.table_name == objects.c.object_name,
+                    constraints.constraint_type == "P",
+                ),
+            )
+            .outerjoin(
+                dictionary.all_cons_columns,
+                and_(
+                    columns.owner == constraints.owner,
+                    columns.table_name == constraints.table_name,
+                    columns.constraint_name == constraints.constraint_name,
+                ),
+            )
+            .order_by(columns.position)
+        )
+        rows = self._execute_reflection(
+            connection,
+            query,
+            dblink=None,
+            returns_long=False,
+            params={"filter_names": [self.denormalize_name(table_name)]},
+        ).all()
+        data = {}
+        if rows:
+            object_name, constraint_name, _ = rows[0]
+            column_names = [
+                self.normalize_name(column_name)
+                for _, _, column_name in rows
+                if column_name is not None
+            ]
+            data[(schema, self.normalize_name(object_name))] = {
+                "name": self.normalize_name(constraint_name) if column_names else None,
+                "constrained_columns": column_names,
+            }
+        return self._value_or_raise(data, table_name, schema)
 
     def _constraint_query(self, owner):
         local = dictionary.all_cons_columns.alias("local")
