@@ -88,6 +88,23 @@ class User(Base):
 Base.metadata.create_all(engine)
 ```
 
+### Inspecting Columns and the Primary Key
+
+For data-loading code that only needs columns and the primary key, use a
+single Inspector on the active connection.
+
+```python
+from sqlalchemy import inspect
+
+with engine.connect() as conn:
+    inspector = inspect(conn)
+    columns = inspector.get_columns("users")
+    primary_key = inspector.get_pk_constraint("users")
+```
+
+On SQLAlchemy 2.x the dialect uses a single dictionary query for the primary key
+of a local table. For a full `Table`, use `Table(..., autoload_with=conn)`. Pass
+`resolve_fks=False` if related tables do not need to be loaded.
 
 ## Requirements
 

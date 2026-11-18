@@ -88,6 +88,22 @@ class User(Base):
 Base.metadata.create_all(engine)
 ```
 
+### 查询列和主键
+
+批量写入只需要列和主键时，可以在当前连接上复用同一个 `Inspector`。
+
+```python
+from sqlalchemy import inspect
+
+with engine.connect() as conn:
+    inspector = inspect(conn)
+    columns = inspector.get_columns("users")
+    primary_key = inspector.get_pk_constraint("users")
+```
+
+在 SQLAlchemy 2.x 中，方言通过一条字典查询获取本地表的主键。需要完整
+`Table` 时，使用 `Table(..., autoload_with=conn)`。无需加载外键引用表时，
+可以传入 `resolve_fks=False`。
 
 ## 系统要求
 
