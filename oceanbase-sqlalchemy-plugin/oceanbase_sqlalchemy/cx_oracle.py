@@ -187,7 +187,10 @@ class OceanBaseDialect_cx_oracle(OracleDialect_cx_oracle):
                 connection, table_name, schema=schema, **kw
             )
 
-        owner = self.denormalize_schema_name(schema or self.default_schema_name)
+        denormalize_schema = getattr(
+            self, "denormalize_schema_name", self.denormalize_name
+        )
+        owner = denormalize_schema(schema or self.default_schema_name)
         objects = self._all_objects_query(
             owner, ObjectScope.ANY, ObjectKind.ANY, True, False
         ).subquery()
